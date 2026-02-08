@@ -1,46 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material Design 3 Color Palette -->
+    <!-- Material Design 3 Color Palette - Gen Z Vibrant Aesthetic -->
     
-    <!-- Primary Colors -->
-    <color name="primaryColor">#6A5ACD</color> <!-- Slate Blue -->
-    <color name="primaryColorDark">#483D8B</color> <!-- Dark Slate Blue -->
-    <color name="primaryColorLight">#9370DB</color> <!-- Medium Purple -->
+    <!-- Primary Colors - Electric Purple/Blue -->
+    <color name="md_theme_light_primary">#6200EE</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#BB86FC</color>
+    <color name="md_theme_light_onPrimaryContainer">#3700B3</color>
     
-    <!-- Secondary Colors -->
-    <color name="secondaryColor">#9370DB</color> <!-- Medium Purple -->
-    <color name="secondaryColorDark">#7B68EE</color> <!-- Medium Slate Blue -->
-    <color name="secondaryColorLight">#B19CD9</color> <!-- Light Purple -->
+    <!-- Secondary Colors - Teal/Cyan -->
+    <color name="md_theme_light_secondary">#03DAC6</color>
+    <color name="md_theme_light_onSecondary">#000000</color>
+    <color name="md_theme_light_secondaryContainer">#66FFF9</color>
+    <color name="md_theme_light_onSecondaryContainer">#00574B</color>
     
-    <!-- Tertiary Colors -->
-    <color name="tertiaryColor">#8B7FB8</color> <!-- Muted Purple -->
+    <!-- Tertiary Colors - Pink/Rose -->
+    <color name="md_theme_light_tertiary">#FF4081</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#FF80AB</color>
+    <color name="md_theme_light_onTertiaryContainer">#880E4F</color>
     
-    <!-- Background Colors -->
-    <color name="backgroundColor">#FFFFFF</color>
-    <color name="backgroundColorDark">#121212</color>
-    <color name="surfaceColor">#F5F5F5</color>
-    <color name="surfaceColorDark">#1E1E1E</color>
+    <!-- Error Colors -->
+    <color name="md_theme_light_error">#CF6679</color>
+    <color name="md_theme_light_errorContainer">#F9DEDC</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410E0B</color>
     
-    <!-- Text Colors -->
-    <color name="textPrimary">#212121</color>
-    <color name="textSecondary">#757575</color>
-    <color name="textPrimaryDark">#FFFFFF</color>
-    <color name="textSecondaryDark">#B0B0B0</color>
+    <!-- Background & Surface - Clean Modern -->
+    <color name="md_theme_light_background">#FAFAFA</color>
+    <color name="md_theme_light_onBackground">#1A1A1A</color>
+    <color name="md_theme_light_surface">#FFFFFF</color>
+    <color name="md_theme_light_onSurface">#1A1A1A</color>
+    <color name="md_theme_light_surfaceVariant">#F5F5F5</color>
+    <color name="md_theme_light_onSurfaceVariant">#424242</color>
     
-    <!-- Status Colors -->
-    <color name="successColor">#4CAF50</color>
-    <color name="errorColor">#F44336</color>
-    <color name="warningColor">#FF9800</color>
+    <!-- Outline -->
+    <color name="md_theme_light_outline">#BDBDBD</color>
+    <color name="md_theme_light_outlineVariant">#E0E0E0</color>
     
-    <!-- Default Gradient Colors (fallback when no music playing) -->
-    <color name="defaultGradient1">#6A5ACD</color>
-    <color name="defaultGradient2">#9370DB</color>
-    <color name="defaultGradient3">#8B7FB8</color>
+    <!-- Dark Theme Colors - Deep Vibrant -->
+    <color name="md_theme_dark_primary">#BB86FC</color>
+    <color name="md_theme_dark_onPrimary">#3700B3</color>
+    <color name="md_theme_dark_primaryContainer">#6200EE</color>
+    <color name="md_theme_dark_onPrimaryContainer">#E1BEE7</color>
     
-    <!-- Common Colors -->
-    <color name="white">#FFFFFFFF</color>
-    <color name="black">#FF000000</color>
+    <color name="md_theme_dark_secondary">#03DAC6</color>
+    <color name="md_theme_dark_onSecondary">#003D35</color>
+    <color name="md_theme_dark_secondaryContainer">#018786</color>
+    <color name="md_theme_dark_onSecondaryContainer">#A7FFEB</color>
+    
+    <color name="md_theme_dark_tertiary">#FF6090</color>
+    <color name="md_theme_dark_onTertiary">#5D0021</color>
+    <color name="md_theme_dark_tertiaryContainer">#B00020</color>
+    <color name="md_theme_dark_onTertiaryContainer">#FFB2DD</color>
+    
+    <color name="md_theme_dark_error">#CF6679</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    
+    <color name="md_theme_dark_background">#121212</color>
+    <color name="md_theme_dark_onBackground">#E1E1E1</color>
+    <color name="md_theme_dark_surface">#1E1E1E</color>
+    <color name="md_theme_dark_onSurface">#E1E1E1</color>
+    <color name="md_theme_dark_surfaceVariant">#2C2C2C</color>
+    <color name="md_theme_dark_onSurfaceVariant">#BDBDBD</color>
+    
+    <color name="md_theme_dark_outline">#757575</color>
+    <color name="md_theme_dark_outlineVariant">#424242</color>
+    
+    <!-- Common Utility Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
     <color name="semiTransparent">#80000000</color>
+    
+    <!-- Glassmorphism & Modern Effects -->
+    <color name="glass_background">#80FFFFFF</color>
+    <color name="glass_background_dark">#80000000</color>
+    <color name="scrim">#52000000</color>
     
 </resources>

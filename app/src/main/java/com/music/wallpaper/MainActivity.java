@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity {
         
         if (isEnabled) {
             permissionStatus.setText(R.string.main_permission_granted);
-            permissionStatus.setTextColor(getColor(R.color.successColor));
+            permissionStatus.setTextColor(getColor(R.color.md_theme_light_secondary));
             btnEnableNotification.setEnabled(false);
         } else {
             permissionStatus.setText(R.string.main_permission_denied);
-            permissionStatus.setTextColor(getColor(R.color.errorColor));
+            permissionStatus.setTextColor(getColor(R.color.md_theme_dark_errorContainer));
             btnEnableNotification.setEnabled(true);
         }
     }

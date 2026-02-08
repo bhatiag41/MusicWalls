@@ -1,8 +1,8 @@
 package com.music.wallpaper.services;
 
+import android.app.Notification;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -13,6 +13,7 @@ import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.music.wallpaper.managers.ColorPaletteManager;
 import com.music.wallpaper.models.ColorPalette;
 import com.music.wallpaper.models.MusicMetadata;
 import com.music.wallpaper.models.WallpaperSettings;
@@ -21,75 +22,64 @@ import com.music.wallpaper.utils.ColorExtractor;
 import java.util.List;
 
 /**
- * NotificationListenerService that detects music notifications and extracts metadata.
- * Broadcasts color palette changes to the wallpaper service.
+ * Notification listener service to detect music notifications and extract color palettes.
+ * Enhanced with ColorPaletteManager for instant wallpaper updates.
  */
 public class MusicListenerService extends NotificationListenerService {
     
     private static final String TAG = "MusicListenerService";
     
-    public static final String ACTION_COLOR_PALETTE_CHANGED = 
-        "com.music.wallpaper.ACTION_COLOR_PALETTE_CHANGED";
+    public static final String ACTION_COLOR_PALETTE_CHANGED = "com.music.wallpaper.COLOR_PALETTE_CHANGED";
     public static final String EXTRA_COLOR_PALETTE_JSON = "color_palette_json";
     public static final String EXTRA_MUSIC_METADATA = "music_metadata";
     
-    private static final long THROTTLE_INTERVAL_MS = 2000; // Max 1 update per 2 seconds
+    private WallpaperSettings settings;
     private long lastUpdateTime = 0;
-    private ColorPalette lastPalette = null;
+    private static final long UPDATE_THROTTLE_MS = 2000; // Max once per 2 seconds
     
     @Override
     public void onCreate() {
         super.onCreate();
+        settings = WallpaperSettings.loadFromPreferences(this);
         Log.d(TAG, "MusicListenerService created");
     }
     
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn == null) return;
-        
         try {
-            // Check if this is a music notification
+            // Reload settings to pick up changes
+            settings = WallpaperSettings.loadFromPreferences(this);
+            
+            // Check if this is a music notification from enabled apps
             if (!isMusicNotification(sbn)) {
                 return;
             }
             
-            // Throttle updates to avoid excessive processing
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastUpdateTime < THROTTLE_INTERVAL_MS) {
-                Log.d(TAG, "Throttling update (too soon)");
-                return;
-            }
+            Log.d(TAG, "Music notification detected from: " + sbn.getPackageName());
             
-            // Extract metadata from notification
-            MusicMetadata metadata = extractMetadataFromNotification(sbn);
+            // Extract music metadata
+            MusicMetadata metadata = extractMetadata(sbn);
             if (metadata == null) {
-                Log.d(TAG, "Could not extract metadata from notification");
+                Log.w(TAG, "Failed to extract metadata");
                 return;
             }
             
-            Log.d(TAG, "Extracted music metadata: " + metadata);
+            Log.d(TAG, "Extracted metadata: " + metadata.getTrackTitle() + " by " + metadata.getArtistName());
             
-            // Extract colors from album art
+            // Extract album artwork
             Bitmap albumArt = metadata.getAlbumArtBitmap();
-            if (albumArt != null) {
-                ColorPalette palette = ColorExtractor.extractPalette(albumArt);
-                
-                // Only broadcast if palette changed
-                if (!palette.equals(lastPalette)) {
-                    broadcastColorPaletteChange(palette, metadata);
-                    lastPalette = palette;
-                    lastUpdateTime = currentTime;
-                    Log.d(TAG, "Broadcasted color palette change: " + palette);
-                }
-            } else {
-                // No album art, use default palette
-                ColorPalette defaultPalette = ColorPalette.getDefaultPalette();
-                if (!defaultPalette.equals(lastPalette)) {
-                    broadcastColorPaletteChange(defaultPalette, metadata);
-                    lastPalette = defaultPalette;
-                    lastUpdateTime = currentTime;
-                }
+            if (albumArt == null) {
+                Log.d(TAG, "No album artwork, using default palette");
+                updateColorPalette(ColorPalette.getDefaultPalette(), metadata);
+                return;
             }
+            
+            // Extract color palette from artwork
+            ColorPalette palette = ColorExtractor.extractPalette(albumArt);
+            Log.d(TAG, "Extracted palette: " + palette);
+            
+            // Update wallpaper with new palette
+            updateColorPalette(palette, metadata);
             
         } catch (Exception e) {
             Log.e(TAG, "Error processing notification", e);
@@ -98,144 +88,74 @@ public class MusicListenerService extends NotificationListenerService {
     
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        if (sbn == null) return;
-        
-        try {
-            // Check if a music notification was removed
-            if (isMusicNotification(sbn)) {
-                Log.d(TAG, "Music notification removed, checking for active music");
-                
-                // Check if there are any other active music sessions
-                if (!hasActiveMusicSession()) {
-                    // No active music, revert to default palette
-                    ColorPalette defaultPalette = ColorPalette.getDefaultPalette();
-                    broadcastColorPaletteChange(defaultPalette, null);
-                    lastPalette = defaultPalette;
-                    Log.d(TAG, "No active music, reverted to default palette");
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error handling notification removal", e);
+        if (isMusicNotification(sbn)) {
+            Log.d(TAG, "Music notification removed");
+            // Could optionally reset to default palette here
         }
     }
     
     /**
-     * Checks if the notification is from a music app.
+     * Checks if notification is from a music app.
      */
     private boolean isMusicNotification(StatusBarNotification sbn) {
-        String packageName = sbn.getPackageName();
+        String packageName = sbn.getPackageName().toLowerCase();
         
-        // Load user settings to check enabled apps
-        WallpaperSettings settings = WallpaperSettings.loadFromPreferences(this);
-        
-        // Check if this app is enabled for music detection
+        // Check against enabled music apps in settings
         return settings.isMusicAppEnabled(packageName);
     }
     
     /**
      * Extracts music metadata from notification.
      */
-    private MusicMetadata extractMetadataFromNotification(StatusBarNotification sbn) {
-        try {
-            android.app.Notification notification = sbn.getNotification();
-            if (notification == null) return null;
-            
-            android.os.Bundle extras = notification.extras;
-            if (extras == null) return null;
-            
-            // Extract basic metadata from notification extras
-            String title = extras.getString(android.app.Notification.EXTRA_TITLE);
-            String text = extras.getString(android.app.Notification.EXTRA_TEXT);
-            String subText = extras.getString(android.app.Notification.EXTRA_SUB_TEXT);
-            
-            // Try to extract album art from notification
-            Bitmap albumArt = null;
-            
-            // Try to get large icon first
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Icon largeIcon = notification.getLargeIcon();
-                if (largeIcon != null) {
-                    try {
-                        albumArt = largeIcon.loadDrawable(this).getCurrent()
-                            instanceof android.graphics.drawable.BitmapDrawable
-                                ? ((android.graphics.drawable.BitmapDrawable) 
-                                    largeIcon.loadDrawable(this).getCurrent()).getBitmap()
-                                : null;
-                    } catch (Exception e) {
-                        Log.w(TAG, "Could not load large icon as bitmap", e);
-                    }
-                }
-            }
-            
-            // Try MediaSession as a more reliable source
-            MusicMetadata mediaSessionMetadata = extractFromMediaSession();
-            if (mediaSessionMetadata != null) {
-                // Prefer MediaSession data if available
-                if (mediaSessionMetadata.hasAlbumArt()) {
-                    albumArt = mediaSessionMetadata.getAlbumArtBitmap();
-                }
-                return new MusicMetadata(
-                    mediaSessionMetadata.getTrackTitle(),
-                    mediaSessionMetadata.getArtistName(),
-                    mediaSessionMetadata.getAlbumName(),
-                    albumArt
-                );
-            }
-            
-            // Fallback to notification extras
-            return new MusicMetadata(
-                title,
-                text, // Often contains artist name
-                subText, // Often contains album name
-                albumArt
-            );
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error extracting metadata", e);
-            return null;
+    private MusicMetadata extractMetadata(StatusBarNotification sbn) {
+        // Try MediaSession first (most reliable)
+        MusicMetadata metadata = extractFromMediaSession();
+        if (metadata != null) {
+            return metadata;
         }
+        
+        // Fallback to notification extras
+        return extractFromNotification(sbn);
     }
     
     /**
-     * Extracts metadata from active MediaSession (more reliable than notification).
+     * Extracts metadata from MediaSession.
      */
     private MusicMetadata extractFromMediaSession() {
         try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            MediaSessionManager sessionManager = (MediaSessionManager)
+                getSystemService(MEDIA_SESSION_SERVICE);
+            
+            if (sessionManager == null) {
                 return null;
             }
             
-            MediaSessionManager sessionManager = 
-                (MediaSessionManager) getSystemService(MEDIA_SESSION_SERVICE);
-            
-            if (sessionManager == null) return null;
-            
-            List<MediaController> controllers = 
-                sessionManager.getActiveSessions(
+            List<MediaController> controllers = sessionManager.getActiveSessions(
                     new android.content.ComponentName(this, MusicListenerService.class)
-                );
+            );
             
             if (controllers == null || controllers.isEmpty()) {
                 return null;
             }
             
-            // Use the first active controller
+            // Get the first active controller
             MediaController controller = controllers.get(0);
             MediaMetadata metadata = controller.getMetadata();
             
-            if (metadata == null) return null;
+            if (metadata == null) {
+                return null;
+            }
             
             String title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
             String artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
             String album = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-            Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            Bitmap art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
             
-            // Fallback to artwork if album art not available
-            if (albumArt == null) {
-                albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            if (art == null) {
+                art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             }
             
-            return new MusicMetadata(title, artist, album, albumArt);
+            return new MusicMetadata(title, artist, album, art);
             
         } catch (Exception e) {
             Log.e(TAG, "Error extracting from MediaSession", e);
@@ -244,43 +164,76 @@ public class MusicListenerService extends NotificationListenerService {
     }
     
     /**
-     * Checks if there's any active music session.
+     * Extracts metadata from notification extras (fallback).
      */
-    private boolean hasActiveMusicSession() {
+    private MusicMetadata extractFromNotification(StatusBarNotification sbn) {
         try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                return false;
+            Notification notification = sbn.getNotification();
+            if (notification.extras == null) {
+                return null;
             }
             
-            MediaSessionManager sessionManager = 
-                (MediaSessionManager) getSystemService(MEDIA_SESSION_SERVICE);
+            String title = notification.extras.getString(Notification.EXTRA_TITLE);
+            String text = notification.extras.getString(Notification.EXTRA_TEXT);
             
-            if (sessionManager == null) return false;
+            // Try to get large icon as album art
+            Bitmap art = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                android.graphics.drawable.Icon icon = notification.getLargeIcon();
+                if (icon != null) {
+                    try {
+                        art = icon.loadDrawable(this).getCurrent() instanceof android.graphics.drawable.BitmapDrawable
+                            ? ((android.graphics.drawable.BitmapDrawable) icon.loadDrawable(this).getCurrent()).getBitmap()
+                            : null;
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to extract bitmap from icon", e);
+                    }
+                }
+            }
             
-            List<MediaController> controllers = 
-                sessionManager.getActiveSessions(
-                    new android.content.ComponentName(this, MusicListenerService.class)
-                );
-            
-            return controllers != null && !controllers.isEmpty();
+            return new MusicMetadata(title, text, null, art);
             
         } catch (Exception e) {
-            Log.e(TAG, "Error checking active sessions", e);
-            return false;
+            Log.e(TAG, "Error extracting from notification", e);
+            return null;
         }
     }
     
     /**
-     * Broadcasts color palette change to wallpaper service.
+     * Updates color palette and broadcasts to wallpaper service.
+     * CRITICAL: Uses multiple broadcast mechanisms for reliability.
      */
-    private void broadcastColorPaletteChange(ColorPalette palette, MusicMetadata metadata) {
-        Intent intent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
-        intent.putExtra(EXTRA_COLOR_PALETTE_JSON, palette.toJsonString());
-        if (metadata != null) {
-            intent.putExtra(EXTRA_MUSIC_METADATA, metadata);
+    private void updateColorPalette(ColorPalette palette, MusicMetadata metadata) {
+        // Throttle updates
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastUpdateTime < UPDATE_THROTTLE_MS) {
+            Log.d(TAG, "Update throttled, skipping");
+            return;
         }
+        lastUpdateTime = currentTime;
         
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        Log.d(TAG, "=== UPDATING COLOR PALETTE ===");
+        Log.d(TAG, "Palette: " + palette);
+        
+        // 1. Update singleton manager (INSTANT access for wallpaper)
+        ColorPaletteManager.getInstance().updatePalette(this, palette);
+        Log.d(TAG, "✓ Updated ColorPaletteManager singleton");
+        
+        // 2. Send LocalBroadcast (for wallpaper service receiver)
+        Intent localIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
+        localIntent.putExtra(EXTRA_COLOR_PALETTE_JSON, palette.toJsonString());
+        localIntent.putExtra(EXTRA_MUSIC_METADATA, metadata);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        Log.d(TAG, "✓ Sent LocalBroadcast");
+        
+        // 3. Send sticky broadcast as fallback
+        Intent stickyIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
+        stickyIntent.putExtra(EXTRA_COLOR_PALETTE_JSON, palette.toJsonString());
+        stickyIntent.putExtra(EXTRA_MUSIC_METADATA, metadata);
+        sendStickyBroadcast(stickyIntent);
+        Log.d(TAG, "✓ Sent sticky broadcast");
+        
+        Log.d(TAG, "=== PALETTE UPDATE COMPLETE ===");
     }
     
     @Override
