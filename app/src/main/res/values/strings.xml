@@ -1,0 +1,87 @@
+<resources>
+    <string name="app_name">Music Wallpaper</string>
+    
+    <!-- Wallpaper Description -->
+    <string name="wallpaper_description">Beautiful live wallpaper that syncs with your music</string>
+    
+    <!-- Main Activity -->
+    <string name="main_welcome_title">Welcome to Music Wallpaper</string>
+    <string name="main_welcome_description">Sync your wallpaper with currently playing music and create stunning animated backgrounds based on album artwork colors.</string>
+    <string name="main_permission_title">Notification Access</string>
+    <string name="main_permission_granted">✓ Notification access granted</string>
+    <string name="main_permission_denied">✗ Notification access required</string>
+    <string name="main_permission_explanation">This app needs notification access to detect music and extract album artwork colors.</string>
+    <string name="main_enable_notification">Enable Notification Access</string>
+    <string name="main_current_music_title">Currently Playing</string>
+    <string name="main_no_music">No music playing</string>
+    <string name="main_btn_set_wallpaper">Set as Wallpaper</string>
+    <string name="main_btn_settings">Settings</string>
+    <string name="main_btn_preview">Preview</string>
+    
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Welcome!</string>
+    <string name="onboarding_welcome_description">Transform your wallpaper into a dynamic visual experience that responds to your music.</string>
+    <string name="onboarding_how_it_works_title">How It Works</string>
+    <string name="onboarding_how_it_works_description">Music Wallpaper detects what you\'re listening to and extracts colors from album artwork to create beautiful, animated gradients.</string>
+    <string name="onboarding_permissions_title">Permissions Needed</string>
+    <string name="onboarding_permissions_description">We need notification access to detect music playing. Your data stays on your device and is never shared.</string>
+    <string name="onboarding_setup_title">Set as Wallpaper</string>
+    <string name="onboarding_setup_description">After granting permissions, set Music Wallpaper as your live wallpaper to enjoy the experience!</string>
+    <string name="onboarding_btn_get_started">Get Started</string>
+    <string name="onboarding_btn_next">Next</string>
+    <string name="onboarding_btn_skip">Skip</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="preview_title">Preview</string>
+    
+    <!-- Texture Mode Entries -->
+    <string-array name="texture_mode_entries">
+        <item>Acrylic (Frosted Glass)</item>
+        <item>Glass (Reflective)</item>
+        <item>Gradient Blur</item>
+    </string-array>
+    <string-array name="texture_mode_values">
+        <item>acrylic</item>
+        <item>glass</item>
+        <item>gradient_blur</item>
+    </string-array>
+    
+    <!-- Music App Entries -->
+    <string-array name="music_app_entries">
+        <item>Spotify</item>
+        <item>YouTube Music</item>
+        <item>Google Play Music</item>
+        <item>Pandora</item>
+        <item>SoundCloud</item>
+        <item>Apple Music</item>
+        <item>Tidal</item>
+        <item>Deezer</item>
+    </string-array>
+    <string-array name="music_app_values">
+        <item>spotify</item>
+        <item>youtube</item>
+        <item>music</item>
+        <item>pandora</item>
+        <item>soundcloud</item>
+        <item>apple</item>
+        <item>tidal</item>
+        <item>deezer</item>
+    </string-array>
+    
+    <!-- Preview Activity -->
+    <string name="preview_cycle_sample">Cycle Sample Art</string>
+    <string name="preview_apply_wallpaper">Apply as Wallpaper</string>
+    <string name="preview_testing_mode">Testing Mode</string>
+    
+    <!-- Error Messages -->
+    <string name="error_wallpaper_set_failed">Failed to open wallpaper settings</string>
+    <string name="error_settings_failed">Failed to open settings</string>
+    
+    <!-- Dialogs -->
+    <string name="dialog_reset_title">Reset Settings?</string>
+    <string name="dialog_reset_message">All settings will be reset to default values.</string>
+    <string name="dialog_reset_confirm">Reset</string>
+    <string name="dialog_cancel">Cancel</string>
+    
+</resources>

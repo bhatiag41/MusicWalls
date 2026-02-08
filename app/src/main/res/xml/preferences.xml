@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <PreferenceCategory
+        android:title="Appearance"
+        android:key="appearance_category">
+        
+        <SeekBarPreference
+            android:key="animation_speed"
+            android:title="Animation Speed"
+            android:summary="Adjust breathing animation speed"
+            android:defaultValue="50"
+            android:max="100"
+            app:showSeekBarValue="true" />
+        
+        <ListPreference
+            android:key="texture_mode"
+            android:title="Texture Style"
+            android:summary="Select wallpaper visual effect"
+            android:defaultValue="acrylic"
+            android:entries="@array/texture_mode_entries"
+            android:entryValues="@array/texture_mode_values" />
+        
+        <SeekBarPreference
+            android:key="color_intensity"
+            android:title="Color Intensity"
+            android:summary="Adjust color saturation (0-100%)"
+            android:defaultValue="80"
+            android:max="100"
+            app:showSeekBarValue="true" />
+        
+        <SeekBarPreference
+            android:key="blur_amount"
+            android:title="Blur Amount"
+            android:summary="Adjust blur effect strength"
+            android:defaultValue="30"
+            android:max="100"
+            app:showSeekBarValue="true" />
+    
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="Music Apps"
+        android:key="music_apps_category">
+        
+        <MultiSelectListPreference
+            android:key="enabled_music_apps"
+            android:title="Enabled Music Apps"
+            android:summary="Select apps to monitor for music"
+            android:entries="@array/music_app_entries"
+            android:entryValues="@array/music_app_values" />
+    
+    </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="Advanced"
+        android:key="advanced_category">
+        
+        <SwitchPreference
+            android:key="debug_mode"
+            android:title="Debug Mode"
+            android:summary="Show FPS counter and debug info"
+            android:defaultValue="false" />
+        
+        <Preference
+            android:key="reset_defaults"
+            android:title="Reset to Defaults"
+            android:summary="Reset all settings to default values" />
+    
+    </PreferenceCategory>
+
+</PreferenceScreen>

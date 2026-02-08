@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Color Palette -->
+    
+    <!-- Primary Colors -->
+    <color name="primaryColor">#6A5ACD</color> <!-- Slate Blue -->
+    <color name="primaryColorDark">#483D8B</color> <!-- Dark Slate Blue -->
+    <color name="primaryColorLight">#9370DB</color> <!-- Medium Purple -->
+    
+    <!-- Secondary Colors -->
+    <color name="secondaryColor">#9370DB</color> <!-- Medium Purple -->
+    <color name="secondaryColorDark">#7B68EE</color> <!-- Medium Slate Blue -->
+    <color name="secondaryColorLight">#B19CD9</color> <!-- Light Purple -->
+    
+    <!-- Tertiary Colors -->
+    <color name="tertiaryColor">#8B7FB8</color> <!-- Muted Purple -->
+    
+    <!-- Background Colors -->
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="backgroundColorDark">#121212</color>
+    <color name="surfaceColor">#F5F5F5</color>
+    <color name="surfaceColorDark">#1E1E1E</color>
+    
+    <!-- Text Colors -->
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textPrimaryDark">#FFFFFF</color>
+    <color name="textSecondaryDark">#B0B0B0</color>
+    
+    <!-- Status Colors -->
+    <color name="successColor">#4CAF50</color>
+    <color name="errorColor">#F44336</color>
+    <color name="warningColor">#FF9800</color>
+    
+    <!-- Default Gradient Colors (fallback when no music playing) -->
+    <color name="defaultGradient1">#6A5ACD</color>
+    <color name="defaultGradient2">#9370DB</color>
+    <color name="defaultGradient3">#8B7FB8</color>
+    
+    <!-- Common Colors -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="semiTransparent">#80000000</color>
+    
+</resources>
