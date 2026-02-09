@@ -6,178 +6,129 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Data model representing a color palette extracted from album artwork.
- * Contains dominant, vibrant, and muted colors for gradient generation.
+ * Enhanced to support specific color lists for blob rendering.
  */
 public class ColorPalette {
     
+    private final List<Integer> colors;
+    
+    // Keep legacy fields for compatibility if needed, or just map them from list
     private final int dominantColor;
-    private final int vibrantColor;
-    private final int mutedColor;
-    private final int darkVibrantColor;
-    private final int lightVibrantColor;
     
     /**
-     * Constructor for ColorPalette.
-     *
-     * @param dominantColor     Most dominant color in the image
-     * @param vibrantColor      Most vibrant/saturated color
-     * @param mutedColor        Most muted/desaturated color
-     * @param darkVibrantColor  Dark vibrant color variant
-     * @param lightVibrantColor Light vibrant color variant
+     * Constructor for ColorPalette with specific list of colors.
      */
-    public ColorPalette(int dominantColor, 
-                       int vibrantColor, 
-                       int mutedColor,
-                       int darkVibrantColor,
-                       int lightVibrantColor) {
-        this.dominantColor = dominantColor;
-        this.vibrantColor = vibrantColor;
-        this.mutedColor = mutedColor;
-        this.darkVibrantColor = darkVibrantColor;
-        this.lightVibrantColor = lightVibrantColor;
+    public ColorPalette(List<Integer> colors) {
+        this.colors = new ArrayList<>(colors);
+        this.dominantColor = colors.isEmpty() ? 0xFF000000 : colors.get(0);
+    }
+    
+    /**
+     * Legacy constructor compatibility
+     */
+    public ColorPalette(int dominant, int vibrant, int muted, int darkVibrant, int lightVibrant) {
+        this.colors = new ArrayList<>();
+        colors.add(dominant);
+        colors.add(vibrant);
+        colors.add(muted);
+        colors.add(darkVibrant);
+        colors.add(lightVibrant);
+        this.dominantColor = dominant;
     }
     
     public int getDominantColor() {
         return dominantColor;
     }
     
-    public int getVibrantColor() {
-        return vibrantColor;
+    @NonNull
+    public List<Integer> getAllColors() {
+        return new ArrayList<>(colors);
     }
     
-    public int getMutedColor() {
-        return mutedColor;
-    }
-    
-    public int getDarkVibrantColor() {
-        return darkVibrantColor;
-    }
-    
-    public int getLightVibrantColor() {
-        return lightVibrantColor;
-    }
-    
-    /**
-     * Returns an array of colors suitable for gradient generation.
-     * Typically returns 2-3 colors that work well together.
-     *
-     * @return Array of color integers
-     */
     @NonNull
     public int[] getGradientColors() {
-        // Return vibrant, dominant, and muted for a nice 3-color gradient
-        return new int[]{vibrantColor, dominantColor, mutedColor};
+        int[] result = new int[colors.size()];
+        for (int i = 0; i < colors.size(); i++) {
+            result[i] = colors.get(i);
+        }
+        return result;
     }
     
-    /**
-     * Returns an array of colors for advanced gradients with more variation.
-     *
-     * @return Array of 5 color integers
-     */
-    @NonNull
-    public int[] getExtendedGradientColors() {
-        return new int[]{
-            lightVibrantColor,
-            vibrantColor,
-            dominantColor,
-            mutedColor,
-            darkVibrantColor
-        };
-    }
-    
-    /**
-     * Serializes this ColorPalette to JSON string.
-     *
-     * @return JSON string representation
-     */
     @NonNull
     public String toJsonString() {
         try {
             JSONObject json = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+            for (int color : colors) {
+                jsonArray.put(color);
+            }
+            json.put("colors", jsonArray);
             json.put("dominant", dominantColor);
-            json.put("vibrant", vibrantColor);
-            json.put("muted", mutedColor);
-            json.put("darkVibrant", darkVibrantColor);
-            json.put("lightVibrant", lightVibrantColor);
             return json.toString();
         } catch (JSONException e) {
             return "{}";
         }
     }
     
-    /**
-     * Deserializes a ColorPalette from JSON string.
-     *
-     * @param jsonString JSON string representation
-     * @return ColorPalette object, or null if parsing fails
-     */
     @NonNull
     public static ColorPalette fromJsonString(@NonNull String jsonString) {
         try {
             JSONObject json = new JSONObject(jsonString);
-            return new ColorPalette(
-                json.getInt("dominant"),
-                json.getInt("vibrant"),
-                json.getInt("muted"),
-                json.getInt("darkVibrant"),
-                json.getInt("lightVibrant")
-            );
+            List<Integer> colors = new ArrayList<>();
+            
+            if (json.has("colors")) {
+                JSONArray jsonArray = json.getJSONArray("colors");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    colors.add(jsonArray.getInt(i));
+                }
+            } else {
+                // Legacy fallback
+                colors.add(json.optInt("dominant"));
+                colors.add(json.optInt("vibrant"));
+                colors.add(json.optInt("muted"));
+                colors.add(json.optInt("darkVibrant"));
+                colors.add(json.optInt("lightVibrant"));
+            }
+            
+            return new ColorPalette(colors);
         } catch (JSONException e) {
-            // Return default palette on error
             return getDefaultPalette();
         }
     }
     
-    /**
-     * Returns a default aesthetic color palette for when no music is playing.
-     *
-     * @return Default ColorPalette
-     */
     @NonNull
     public static ColorPalette getDefaultPalette() {
-        // Beautiful purple to blue gradient
-        return new ColorPalette(
-            0xFF6A5ACD,  // Slate blue (dominant)
-            0xFF9370DB,  // Medium purple (vibrant)
-            0xFF8B7FB8,  // Muted purple
-            0xFF483D8B,  // Dark slate blue (dark vibrant)
-            0xFFB19CD9   // Light purple (light vibrant)
-        );
+        // Default VIBRANT NEON colors for AMOLED
+        List<Integer> defaults = new ArrayList<>();
+        defaults.add(0xFF00E5FF); // Neon Cyan
+        defaults.add(0xFFD500F9); // Neon Purple
+        defaults.add(0xFF76FF03); // Neon Green
+        defaults.add(0xFFFF3D00); // Neon Orange
+        defaults.add(0xFF2979FF); // Electric Blue
+        return new ColorPalette(defaults);
     }
     
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        
         ColorPalette that = (ColorPalette) o;
-        
-        if (dominantColor != that.dominantColor) return false;
-        if (vibrantColor != that.vibrantColor) return false;
-        if (mutedColor != that.mutedColor) return false;
-        if (darkVibrantColor != that.darkVibrantColor) return false;
-        return lightVibrantColor == that.lightVibrantColor;
+        return colors.equals(that.colors);
     }
     
     @Override
     public int hashCode() {
-        int result = dominantColor;
-        result = 31 * result + vibrantColor;
-        result = 31 * result + mutedColor;
-        result = 31 * result + darkVibrantColor;
-        result = 31 * result + lightVibrantColor;
-        return result;
+        return colors.hashCode();
     }
     
     @NonNull
     @Override
     public String toString() {
-        return "ColorPalette{" +
-                "dominant=" + String.format("#%06X", (0xFFFFFF & dominantColor)) +
-                ", vibrant=" + String.format("#%06X", (0xFFFFFF & vibrantColor)) +
-                ", muted=" + String.format("#%06X", (0xFFFFFF & mutedColor)) +
-                '}';
+        return "ColorPalette{colors=" + colors + "}";
     }
 }

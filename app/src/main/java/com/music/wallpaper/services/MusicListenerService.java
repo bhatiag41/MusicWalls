@@ -203,37 +203,53 @@ public class MusicListenerService extends NotificationListenerService {
      * Updates color palette and broadcasts to wallpaper service.
      * CRITICAL: Uses multiple broadcast mechanisms for reliability.
      */
+    /**
+     * Updates color palette and broadcasts to wallpaper service.
+     */
     private void updateColorPalette(ColorPalette palette, MusicMetadata metadata) {
         // Throttle updates
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime < UPDATE_THROTTLE_MS) {
-            Log.d(TAG, "Update throttled, skipping");
             return;
         }
         lastUpdateTime = currentTime;
         
         Log.d(TAG, "=== UPDATING COLOR PALETTE ===");
-        Log.d(TAG, "Palette: " + palette);
         
-        // 1. Update singleton manager (INSTANT access for wallpaper)
+        // 1. SAVE TO PREFERENCES (Critical for persistence)
+        saveColorsToPrefs(palette);
+        
+        // 2. Update singleton manager 
         ColorPaletteManager.getInstance().updatePalette(this, palette);
-        Log.d(TAG, "✓ Updated ColorPaletteManager singleton");
         
-        // 2. Send LocalBroadcast (for wallpaper service receiver)
+        // 3. Send LocalBroadcast
         Intent localIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
         localIntent.putExtra(EXTRA_COLOR_PALETTE_JSON, palette.toJsonString());
+        // Add raw integer list for easier parsing
+        localIntent.putIntegerArrayListExtra("colors", (java.util.ArrayList<Integer>) palette.getAllColors());
         localIntent.putExtra(EXTRA_MUSIC_METADATA, metadata);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
-        Log.d(TAG, "✓ Sent LocalBroadcast");
         
-        // 3. Send sticky broadcast as fallback
+        // 4. Send Sticky Broadcast (Global) because WallpaperService runs in separate process potentially
         Intent stickyIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
         stickyIntent.putExtra(EXTRA_COLOR_PALETTE_JSON, palette.toJsonString());
-        stickyIntent.putExtra(EXTRA_MUSIC_METADATA, metadata);
+        stickyIntent.putIntegerArrayListExtra("colors", (java.util.ArrayList<Integer>) palette.getAllColors());
         sendStickyBroadcast(stickyIntent);
-        Log.d(TAG, "✓ Sent sticky broadcast");
         
-        Log.d(TAG, "=== PALETTE UPDATE COMPLETE ===");
+        Log.d(TAG, "=== PALETTE UPDATE COMPLETE (" + palette.getAllColors().size() + " colors) ===");
+    }
+    
+    private void saveColorsToPrefs(ColorPalette palette) {
+        android.content.SharedPreferences prefs = getSharedPreferences("WallpaperPrefs", MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+        
+        List<Integer> colors = palette.getAllColors();
+        editor.putInt("color_count", colors.size());
+        for (int i = 0; i < colors.size(); i++) {
+            editor.putInt("color_" + i, colors.get(i));
+        }
+        editor.apply(); // Async save
+        Log.d(TAG, "Saved " + colors.size() + " colors to SharedPreferences");
     }
     
     @Override

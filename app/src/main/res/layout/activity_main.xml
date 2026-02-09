@@ -1,184 +1,349 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".MainActivity">
+    android:background="@android:color/black">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!-- Background removed for performance -->
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="@string/app_name"
-            app:titleTextColor="@color/white" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
+    <!-- Glass Overlay UI -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:fitsSystemWindows="false"
+        tools:context=".MainActivity">
 
-        <LinearLayout
+        <!-- Scrollable Content -->
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/margin_medium">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="48dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <!-- Welcome Card -->
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_medium"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardCornerRadius="@dimen/card_corner_radius">
+                android:orientation="vertical"
+                android:padding="16dp">
 
+                <!-- App Title / Header (Minimalist) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_medium">
+                    android:gravity="center"
+                     android:layout_marginBottom="32dp">
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@mipmap/ic_launcher"
+                        android:contentDescription="@string/app_name"
+                        android:layout_marginBottom="12dp" />
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/main_welcome_title"
-                        android:textSize="@dimen/text_size_title"
+                        android:text="@string/app_name"
+                        android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/glass_text"
+                        android:shadowColor="@color/black"
+                        android:shadowDx="0"
+                        android:shadowDy="2"
+                        android:shadowRadius="4" />
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_small"
-                        android:text="@string/main_welcome_description"
-                        android:textSize="@dimen/text_size_body"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
+                        android:text="@string/main_hero_subtitle"
+                        android:textSize="14sp"
+                        android:textColor="@color/glass_text_secondary"
+                        android:layout_marginTop="4dp"
+                        android:shadowColor="@color/black"
+                        android:shadowDx="0"
+                        android:shadowDy="1"
+                        android:shadowRadius="2" />
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                <!-- Permission Status Glass Card -->
+                <com.music.wallpaper.ui.components.GlassCardView
+                    android:id="@+id/permissionCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/glass_border"
+                    app:cardBackgroundColor="@color/glass_surface">
 
-            <!-- Permission Status Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/permissionCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_medium"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardCornerRadius="@dimen/card_corner_radius">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:id="@+id/permissionIcon"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@android:drawable/ic_dialog_alert"
+                                android:contentDescription="@string/main_permission_title"
+                                app:tint="@color/glass_text" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="16dp">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_permission_title"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/glass_text" />
+
+                                <TextView
+                                    android:id="@+id/permissionStatus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_permission_denied"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/glass_text_secondary"
+                                    android:layout_marginTop="4dp" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/main_permission_explanation"
+                            android:textSize="14sp"
+                            android:textColor="@color/glass_text_secondary"
+                            android:lineSpacingMultiplier="1.2" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEnableNotification"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:layout_marginTop="20dp"
+                            android:text="@string/main_enable_notification"
+                            android:textColor="@color/white"
+                            app:backgroundTint="@color/glass_surface_strong"
+                            app:cornerRadius="28dp"
+                            app:elevation="0dp"
+                            app:strokeColor="@color/glass_border"
+                            app:strokeWidth="1dp" />
+
+                    </LinearLayout>
+
+                </com.music.wallpaper.ui.components.GlassCardView>
+
+                <!-- Current Music Glass Card -->
+                <com.music.wallpaper.ui.components.GlassCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/glass_border"
+                    app:cardBackgroundColor="@color/glass_surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="24dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@android:drawable/ic_menu_gallery"
+                            android:contentDescription="@string/main_current_music_title"
+                            app:tint="@color/glass_text"
+                            android:background="@drawable/glass_round_bg"
+                            android:padding="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_current_music_title"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/glass_text" />
+
+                            <TextView
+                                android:id="@+id/currentMusicText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_no_music"
+                                android:textSize="14sp"
+                                android:textColor="@color/glass_text_secondary"
+                                android:layout_marginTop="4dp"
+                                android:maxLines="2"
+                                android:ellipsize="end" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.music.wallpaper.ui.components.GlassCardView>
+
+                <!-- Quick Actions Header -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/main_quick_actions"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/glass_text"
+                    android:layout_marginBottom="16dp"
+                    android:paddingStart="8dp" />
+
+                <!-- Action Buttons Grid -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/padding_medium">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/main_permission_title"
-                        android:textSize="@dimen/text_size_title"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface" />
+                    <com.music.wallpaper.ui.components.GlassCardView
+                        android:id="@+id/btnSetWallpaper"
+                        android:layout_width="0dp"
+                        android:layout_height="140dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="24dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="@color/glass_border"
+                        app:cardBackgroundColor="@color/glass_surface_light">
 
-                    <TextView
-                        android:id="@+id/permissionStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_small"
-                        android:text="@string/main_permission_denied"
-                        android:textSize="@dimen/text_size_body"
-                        android:textColor="?attr/colorError" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_small"
-                        android:text="@string/main_permission_explanation"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@android:drawable/ic_menu_gallery"
+                                android:contentDescription="@string/main_btn_set_wallpaper"
+                                app:tint="@color/glass_text" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnEnableNotification"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_medium"
-                        android:text="@string/main_enable_notification" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_btn_set_wallpaper"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/glass_text"
+                                android:textAlignment="center"
+                                android:layout_marginTop="12dp" />
+
+                        </LinearLayout>
+
+                    </com.music.wallpaper.ui.components.GlassCardView>
+
+                    <com.music.wallpaper.ui.components.GlassCardView
+                        android:id="@+id/btnPreview"
+                        android:layout_width="0dp"
+                        android:layout_height="140dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="24dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="@color/glass_border"
+                        app:cardBackgroundColor="@color/glass_surface_light">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="16dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@android:drawable/ic_menu_view"
+                                android:contentDescription="@string/main_btn_preview"
+                                app:tint="@color/glass_text" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_btn_preview"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/glass_text"
+                                android:textAlignment="center"
+                                android:layout_marginTop="12dp" />
+
+                        </LinearLayout>
+
+                    </com.music.wallpaper.ui.components.GlassCardView>
 
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Current Music Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_medium"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardCornerRadius="@dimen/card_corner_radius">
-
-                <LinearLayout
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSettings"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/padding_medium">
+                    android:layout_height="56dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/main_btn_settings"
+                    android:textColor="@color/glass_text"
+                    app:icon="@android:drawable/ic_menu_preferences"
+                    app:iconTint="@color/glass_text"
+                    app:backgroundTint="@color/glass_surface"
+                    app:cornerRadius="28dp"
+                    app:elevation="0dp"
+                    app:strokeColor="@color/glass_border"
+                    app:strokeWidth="1dp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/main_current_music_title"
-                        android:textSize="@dimen/text_size_title"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface" />
+                <!-- Bottom Spacing -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp" />
 
-                    <TextView
-                        android:id="@+id/currentMusicText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_small"
-                        android:text="@string/main_no_music"
-                        android:textSize="@dimen/text_size_body"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
 
-                </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Action Buttons -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSetWallpaper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_small"
-                android:text="@string/main_btn_set_wallpaper"
-                app:icon="@android:drawable/ic_menu_gallery" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPreview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_small"
-                android:text="@string/main_btn_preview"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/main_btn_settings"
-                style="@style/Widget.Material3.Button.TextButton" />
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

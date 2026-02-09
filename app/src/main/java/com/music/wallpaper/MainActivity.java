@@ -34,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         
+        // Make window transparent
+        android.view.Window w = getWindow();
+        w.setFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, 
+                   android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        
         setContentView(R.layout.activity_main);
         
         initializeViews();
@@ -46,9 +51,18 @@ public class MainActivity extends AppCompatActivity {
         updatePermissionStatus();
     }
     
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    
     private void initializeViews() {
         permissionStatus = findViewById(R.id.permissionStatus);
         btnEnableNotification = findViewById(R.id.btnEnableNotification);
+        
+        // Update current music text
+        TextView musicText = findViewById(R.id.currentMusicText);
+        musicText.setSelected(true); // Enable marquee
     }
     
     private void setupClickListeners() {
@@ -56,17 +70,18 @@ public class MainActivity extends AppCompatActivity {
             PermissionManager.openNotificationListenerSettings(this);
         });
         
-        MaterialButton btnSetWallpaper = findViewById(R.id.btnSetWallpaper);
-        btnSetWallpaper.setOnClickListener(v -> {
+        // Set Wallpaper Card
+        findViewById(R.id.btnSetWallpaper).setOnClickListener(v -> {
             PermissionManager.openLiveWallpaperSettings(this);
         });
         
-        MaterialButton btnPreview = findViewById(R.id.btnPreview);
-        btnPreview.setOnClickListener(v -> {
+        // Preview Card
+        findViewById(R.id.btnPreview).setOnClickListener(v -> {
             Intent intent = new Intent(this, PreviewActivity.class);
             startActivity(intent);
         });
         
+        // Settings Button
         MaterialButton btnSettings = findViewById(R.id.btnSettings);
         btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(this, SettingsActivity.class);
@@ -79,11 +94,11 @@ public class MainActivity extends AppCompatActivity {
         
         if (isEnabled) {
             permissionStatus.setText(R.string.main_permission_granted);
-            permissionStatus.setTextColor(getColor(R.color.md_theme_light_secondary));
+            permissionStatus.setTextColor(getResources().getColor(R.color.md_theme_light_secondary, getTheme()));
             btnEnableNotification.setEnabled(false);
         } else {
             permissionStatus.setText(R.string.main_permission_denied);
-            permissionStatus.setTextColor(getColor(R.color.md_theme_dark_errorContainer));
+            permissionStatus.setTextColor(getResources().getColor(R.color.md_theme_light_error, getTheme()));
             btnEnableNotification.setEnabled(true);
         }
     }

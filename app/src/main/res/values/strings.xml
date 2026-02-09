@@ -4,9 +4,12 @@
     <!-- Wallpaper Description -->
     <string name="wallpaper_description">Beautiful live wallpaper that syncs with your music</string>
     
+    
     <!-- Main Activity -->
     <string name="main_welcome_title">Welcome to Music Wallpaper</string>
     <string name="main_welcome_description">Sync your wallpaper with currently playing music and create stunning animated backgrounds based on album artwork colors.</string>
+    <string name="main_hero_subtitle">Your music, visualized in motion</string>
+    <string name="main_quick_actions">Quick Actions</string>
     <string name="main_permission_title">Notification Access</string>
     <string name="main_permission_granted">✓ Notification access granted</string>
     <string name="main_permission_denied">✗ Notification access required</string>

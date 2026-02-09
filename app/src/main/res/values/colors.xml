@@ -80,4 +80,21 @@
     <color name="glass_background_dark">#80000000</color>
     <color name="scrim">#52000000</color>
     
+    <!-- Glassmorphism Frosted Glass Surfaces -->
+    <color name="glass_surface">#33FFFFFF</color>           <!-- 20% white -->
+    <color name="glass_surface_strong">#4DFFFFFF</color>    <!-- 30% white -->
+    <color name="glass_surface_light">#26FFFFFF</color>     <!-- 15% white -->
+    <color name="glass_border">#66FFFFFF</color>            <!-- 40% white border -->
+    <color name="glass_text">#FFFFFF</color>                <!-- Pure white text -->
+    <color name="glass_text_secondary">#CCFFFFFF</color>    <!-- 80% white secondary -->
+    
+    <!-- Soft Gradient Pastels (Desaturated, Bright) -->
+    <color name="soft_lavender">#E6D9F2</color>
+    <color name="soft_blue">#D9E9F5</color>
+    <color name="soft_teal">#D9F5F2</color>
+    <color name="soft_pink">#F5D9E6</color>
+    <color name="soft_peach">#F5E6D9</color>
+    <color name="soft_mint">#E6F5D9</color>
+    <color name="soft_neutral">#E8E8E8</color>
+    
 </resources>

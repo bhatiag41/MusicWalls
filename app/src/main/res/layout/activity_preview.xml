@@ -4,47 +4,60 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Wallpaper Surface -->
     <SurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Overlay UI -->
+    <!-- Glass Overlay (Darker for AMOLED) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#05ffffff" />
+
+    <!-- UI Overlay -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/semiTransparent"
+            android:background="@android:color/transparent"
             app:layout_constraintTop_toTopOf="parent"
-            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel" />
+            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+            app:title="Preview"
+            app:titleTextColor="#FFFFFF" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="@dimen/margin_medium"
+            android:padding="24dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/btnCycleSample"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="64dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:text="@string/preview_cycle_sample"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
+                android:layout_marginEnd="8dp"
+                android:text="Cycle Color"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#33FFFFFF" />
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/btnApplyWallpaper"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="64dp"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/margin_small"
-                android:text="@string/preview_apply_wallpaper" />
+                android:layout_marginStart="8dp"
+                android:text="Set Wallpaper"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#667eea" />
 
         </LinearLayout>
 

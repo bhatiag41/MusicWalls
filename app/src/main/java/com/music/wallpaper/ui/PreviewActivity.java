@@ -53,10 +53,10 @@ public class PreviewActivity extends AppCompatActivity implements SurfaceHolder.
         WallpaperSettings settings = WallpaperSettings.loadFromPreferences(this);
         renderer.setSettings(settings);
         
-        MaterialButton btnCycleSample = findViewById(R.id.btnCycleSample);
+        android.widget.Button btnCycleSample = findViewById(R.id.btnCycleSample);
         btnCycleSample.setOnClickListener(v -> cycleSamplePalette());
         
-        MaterialButton btnApplyWallpaper = findViewById(R.id.btnApplyWallpaper);
+        android.widget.Button btnApplyWallpaper = findViewById(R.id.btnApplyWallpaper);
         btnApplyWallpaper.setOnClickListener(v -> {
             PermissionManager.openLiveWallpaperSettings(this);
         });

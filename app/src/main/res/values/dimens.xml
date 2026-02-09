@@ -15,6 +15,8 @@
     
     <dimen name="button_height">56dp</dimen>
     <dimen name="button_corner_radius">28dp</dimen>
+    <dimen name="button_corner_width">2dp</dimen>
+
     
     <dimen name="text_size_small">12sp</dimen>
     <dimen name="text_size_medium">14sp</dimen>
