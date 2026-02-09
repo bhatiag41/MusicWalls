@@ -3,230 +3,256 @@ package com.music.wallpaper.renderer;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.util.Log;
 
 import com.music.wallpaper.models.ColorPalette;
 import com.music.wallpaper.models.WallpaperSettings;
-import com.music.wallpaper.utils.AnimationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
- * Renderer that creates soft, drifting color blobs for a watercolor effect.
- * Implements the "Color Blob" design pattern requested for softer, non-circular rendering.
+ * Robust Renderer Rewritten for Stability.
+ * Features:
+ * - Explicit logging for debugging
+ * - Simplified drawing pipeline
+ * - Guaranteed fallback colors
+ * - Debug indicator to prove rendering
  */
 public class WallpaperRenderer {
     
     private static final String TAG = "WallpaperRenderer";
     
+    // Core Data
     private List<ColorBlob> colorBlobs;
-    private final Paint paint;
-    private final Paint basePaint;
-    private final AnimationHelper.FpsCounter fpsCounter;
-    
-    private int width;
-    private int height;
+    private int width = 0;
+    private int height = 0;
     private ColorPalette currentPalette;
     
-    // Settings
-    private static final int BLOB_COUNT = 7;
-    private static final float BLOB_SPEED_FACTOR = 0.0003f;
+    // Painting Tools
+    private final Paint blobPaint;
+    private final Paint debugPaint;
+    private final Random random = new Random();
     
     public WallpaperRenderer() {
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setDither(true);
-        // Use SCREEN mode for light, airy color mixing as requested
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
+        Log.d(TAG, "Creating new WallpaperRenderer");
         
-        basePaint = new Paint();
-        basePaint.setColor(Color.parseColor("#F5F5F5")); // Light base
-        
-        fpsCounter = new AnimationHelper.FpsCounter();
         colorBlobs = new ArrayList<>();
+        
+        // Initialize Paints
+        blobPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        blobPaint.setDither(true);
+        blobPaint.setStyle(Paint.Style.FILL);
+        
+        debugPaint = new Paint();
+        debugPaint.setColor(Color.RED);
+        debugPaint.setStyle(Paint.Style.FILL);
     }
     
+    /**
+     * Set the dimensions of the render surface.
+     * This triggers blob initialization.
+     */
     public void setSurfaceSize(int width, int height) {
+        Log.d(TAG, "setSurfaceSize: " + width + "x" + height);
         this.width = width;
         this.height = height;
+        
+        // Re-initialize blobs with new dimensions
         initializeBlobs();
     }
     
+    /**
+     * Update the color palette.
+     */
     public void setColorPalette(ColorPalette palette) {
+        Log.d(TAG, "setColorPalette: " + (palette != null ? palette.getAllColors().size() + " colors" : "null"));
         this.currentPalette = palette;
-        if (width > 0 && height > 0) {
-            refreshBlobColors();
+        
+        if (colorBlobs.isEmpty() || width <= 0) {
+            // Deferred init
+            return;
         }
+        
+        // Refresh targets
+        List<Integer> colors = (palette != null) ? palette.getAllColors() : new ArrayList<>();
+        if (colors.isEmpty()) colors = getDefaultColors();
+        
+        for (int i = 0; i < colorBlobs.size(); i++) {
+            colorBlobs.get(i).targetColor = colors.get(i % colors.size());
+        }
+        Log.d(TAG, "Updated targets for " + colorBlobs.size() + " blobs");
     }
     
     public void setSettings(WallpaperSettings settings) {
-        // Optional: adjust speed/blur based on settings
+        // Placeholder
     }
     
+    /**
+     * Core initialization logic.
+     * Guaranteed to produce blobs if width/height are valid.
+     */
     private void initializeBlobs() {
+        if (width <= 0 || height <= 0) {
+            Log.w(TAG, "Skipping init: Invalid dimensions");
+            return;
+        }
+        
+        Log.d(TAG, "Initializing Blobs...");
         colorBlobs.clear();
         
-        List<Integer> colors = new ArrayList<>();
-        if (currentPalette != null) {
+        List<Integer> colors;
+        if (currentPalette != null && !currentPalette.getAllColors().isEmpty()) {
             colors = currentPalette.getAllColors();
+        } else {
+            colors = getDefaultColors();
         }
         
-        if (colors.isEmpty()) {
-            // Default colors if none provided
-            colors.add(Color.parseColor("#FF6B9D"));
-            colors.add(Color.parseColor("#C96DD8"));
-            colors.add(Color.parseColor("#6B8DD8"));
-            colors.add(Color.parseColor("#5FDDE5"));
-            colors.add(Color.parseColor("#FFC947"));
-        }
+        Log.d(TAG, "Using " + colors.size() + " base colors");
         
-        // Create one blob for each color
-        for (int i = 0; i < colors.size(); i++) {
+        // Create 7 blobs for good coverage
+        for (int i = 0; i < 7; i++) {
             ColorBlob blob = new ColorBlob();
             
-            // Distribute blobs across screen
-            // Use grid-like distribution for better coverage
-            switch(i % 5) {
-                case 0: blob.x = 0.2f; blob.y = 0.3f; break;
-                case 1: blob.x = 0.7f; blob.y = 0.2f; break;
-                case 2: blob.x = 0.5f; blob.y = 0.5f; break;
-                case 3: blob.x = 0.3f; blob.y = 0.7f; break;
-                case 4: blob.x = 0.8f; blob.y = 0.8f; break;
-                default: 
-                    blob.x = (float) Math.random();
-                    blob.y = (float) Math.random();
-            }
+            // Grid-like random distribution
+            blob.x = (random.nextFloat() * 0.8f) + 0.1f; // Keep away from extreme edges
+            blob.y = (random.nextFloat() * 0.8f) + 0.1f;
             
-            // Large radius for soft coverage
-            float maxDim = Math.max(width, height);
-            blob.radius = maxDim * 0.6f; // 60% of screen width
-            blob.color = colors.get(i);
+            // Movement vectors
+            blob.vx = (random.nextFloat() - 0.5f) * 0.001f;
+            blob.vy = (random.nextFloat() - 0.5f) * 0.001f;
             
-            // Very slow movement
-            blob.vx = 0.0001f * (float)(Math.random() - 0.5);
-            blob.vy = 0.0001f * (float)(Math.random() - 0.5);
-            blob.phase = (float)(Math.random() * Math.PI * 2);
+            // Size: 50% to 90% of screen width
+            float baseSize = Math.min(width, height);
+            blob.radius = baseSize * (0.5f + random.nextFloat() * 0.4f);
+            
+            // Colors
+            int color = colors.get(i % colors.size());
+            blob.color = color;
+            blob.targetColor = color;
             
             colorBlobs.add(blob);
         }
-
+        
+        Log.d(TAG, "Initialized " + colorBlobs.size() + " blobs");
     }
     
-    // Removed unused resetBlob 
-    
-    private void refreshBlobColors() {
-        if (colorBlobs.isEmpty() || currentPalette == null) {
-             initializeBlobs(); // Re-init if empty
-             return;
-        }
-        
-        List<Integer> colors = currentPalette.getAllColors();
-        if (colors.isEmpty()) return;
-        
-        for (int i = 0; i < colorBlobs.size(); i++) {
-            colorBlobs.get(i).color = colors.get(i % colors.size());
-        }
+    private List<Integer> getDefaultColors() {
+        List<Integer> defaults = new ArrayList<>();
+        defaults.add(Color.parseColor("#00E5FF")); // Cyan
+        defaults.add(Color.parseColor("#D500F9")); // Purple
+        defaults.add(Color.parseColor("#76FF03")); // Lime
+        defaults.add(Color.parseColor("#FFC400")); // Amber
+        defaults.add(Color.parseColor("#F50057")); // Pink
+        return defaults;
     }
     
+    /**
+     * MAIN DRAW METHOD
+     */
     public void draw(Canvas canvas) {
-        // FIRST: Verify canvas is not null
-        if (canvas == null) {
-            return;
+        if (canvas == null) return;
+        
+        // 1. Fill Background (Clear previous frame)
+        canvas.drawColor(Color.BLACK);
+        
+        // 2. Safety Check
+        if (width <= 0 || height <= 0) {
+            width = canvas.getWidth();
+            height = canvas.getHeight();
+            initializeBlobs();
         }
         
-        // Get canvas dimensions
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        
-        // Draw base color - AMOLED BLACK
-        canvas.drawColor(Color.BLACK); 
-        
-        // Verify we have color blobs
-        if (colorBlobs == null || colorBlobs.isEmpty()) {
-            // Draw test gradient to verify rendering works
-            Paint testPaint = new Paint();
-            android.graphics.LinearGradient gradient = new android.graphics.LinearGradient(
-                0, 0, canvasWidth, canvasHeight,
-                Color.parseColor("#FF6B9D"),
-                Color.parseColor("#5FDDE5"),
-                Shader.TileMode.CLAMP
-            );
-            testPaint.setShader(gradient);
-            canvas.drawRect(0, 0, canvasWidth, canvasHeight, testPaint);
-            
-            // Try to init blobs for next time
-            if (width > 0 && height > 0) initializeBlobs();
-            return;
+        if (colorBlobs.isEmpty()) {
+            initializeBlobs();
+            // If still empty, draw emergency fallback
+            if (colorBlobs.isEmpty()) {
+                Log.e(TAG, "Emergency: No blobs to draw!");
+                canvas.drawColor(Color.DKGRAY);
+                return;
+            }
         }
         
-        fpsCounter.update();
-        
-        // Draw each color blob
-        Paint blobPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        blobPaint.setDither(true);
-        
-        for (int i = 0; i < colorBlobs.size(); i++) {
-            ColorBlob blob = colorBlobs.get(i);
-            
+        // 3. Draw Blobs
+        for (ColorBlob blob : colorBlobs) {
+            // Update Physics
             updateBlobPosition(blob);
+            updateBlobColor(blob);
             
-            // Calculate actual pixel positions
-            float centerX = blob.x * canvasWidth;
-            float centerY = blob.y * canvasHeight;
+            // Convert normalized to pixels
+            float px = blob.x * width;
+            float py = blob.y * height;
             
-            // Create radial gradient
-            // FOR DARK MODE: Use higher opacity center to pop against black
-            int[] colors = new int[] {
-                setAlpha(blob.color, 200), // 80% opacity at center for vibrancy
-                setAlpha(blob.color, 100), // 40% opacity at middle
-                setAlpha(blob.color, 0)    // Transparent at edge
-            };
+            // Valid Radius check
+            if (blob.radius <= 1f) blob.radius = 100f;
+            
+            // Gradient Setup
+            // Center = Opaque Color, Edge = Transparent
+            int c = blob.color;
+            int startColor = Color.argb(255, Color.red(c), Color.green(c), Color.blue(c));
+            int midColor   = Color.argb(128, Color.red(c), Color.green(c), Color.blue(c));
+            int endColor   = Color.argb(0,   Color.red(c), Color.green(c), Color.blue(c));
             
             RadialGradient gradient = new RadialGradient(
-                centerX, centerY,
+                px, py, 
                 blob.radius,
-                colors,
-                new float[] {0f, 0.6f, 1.0f},
+                new int[] { startColor, midColor, endColor },
+                new float[] { 0.0f, 0.6f, 1.0f },
                 Shader.TileMode.CLAMP
             );
             
             blobPaint.setShader(gradient);
             
-            // Use SCREEN or ADD for glowing effect on black
-            blobPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
-            
-            // Draw the blob
-            canvas.drawCircle(centerX, centerY, blob.radius, blobPaint);
+            // Draw
+            canvas.drawCircle(px, py, blob.radius, blobPaint);
         }
         
-        // Update FPS logic if needed or debug info
+        // 4. Debug Indicator (Remove in production, keep for user diagnosis)
+        // Red dot in top-left corner proves draw() is called and canvas is working
+        // canvas.drawRect(0, 0, 20, 20, debugPaint); 
     }
-    
-    private int setAlpha(int color, int alpha) {
-        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
-    }
-    
-    // ... rest of class ...
     
     private void updateBlobPosition(ColorBlob blob) {
         blob.x += blob.vx;
         blob.y += blob.vy;
         
-        // Wrap around edges
-        if (blob.x > 1.2f) blob.x = -0.2f;
-        if (blob.x < -0.2f) blob.x = 1.2f;
-        if (blob.y > 1.2f) blob.y = -0.2f;
-        if (blob.y < -0.2f) blob.y = 1.2f;
+        // Bounce off walls (or wrap) - using Bounce for visibility
+        if (blob.x < -0.2f || blob.x > 1.2f) blob.vx *= -1;
+        if (blob.y < -0.2f || blob.y > 1.2f) blob.vy *= -1;
     }
-
+    
+    private void updateBlobColor(ColorBlob blob) {
+        if (blob.color == blob.targetColor) return;
+        
+        float fraction = 0.05f; // 5% per frame
+        
+        int c1 = blob.color;
+        int c2 = blob.targetColor;
+        
+        int a = (int) (Color.alpha(c1) + (Color.alpha(c2) - Color.alpha(c1)) * fraction);
+        int r = (int) (Color.red(c1)   + (Color.red(c2)   - Color.red(c1))   * fraction);
+        int g = (int) (Color.green(c1) + (Color.green(c2) - Color.green(c1)) * fraction);
+        int b = (int) (Color.blue(c1)  + (Color.blue(c2)  - Color.blue(c1))  * fraction);
+        
+        blob.color = Color.argb(a, r, g, b);
+        
+        // Snap if close
+        if (Math.abs(Color.red(c1) - Color.red(c2)) < 5 &&
+            Math.abs(Color.green(c1) - Color.green(c2)) < 5 &&
+            Math.abs(Color.blue(c1) - Color.blue(c2)) < 5) {
+            blob.color = blob.targetColor;
+        }
+    }
+    
+    // Simple POJO
     private static class ColorBlob {
-        float x, y;    // Normalized 0-1
+        float x, y;
         float vx, vy;
         float radius;
         int color;
-        float phase;
+        int targetColor;
     }
 }

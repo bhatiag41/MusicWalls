@@ -48,6 +48,9 @@ public class LiveMusicWallpaperService extends WallpaperService {
             }
         };
         
+        // SharedPreference Listener for robust updates
+        private android.content.SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
+        
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
@@ -58,46 +61,27 @@ public class LiveMusicWallpaperService extends WallpaperService {
             handler = new Handler();
             
             // Register listener
+            // Register listener
             ColorPaletteManager.getInstance().addListener(this);
             registerColorPaletteReceiver();
+            registerPrefsListener();
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            Log.d(TAG, "Surface created");
-            
-            // Get surface dimensions
-            android.graphics.Rect frame = holder.getSurfaceFrame();
-            int width = frame.width();
-            int height = frame.height();
-            
-            Log.d(TAG, "Dimensions: " + width + "x" + height);
-            
-            // Initialize renderer with dimensions and colors
-            java.util.List<Integer> colors = loadColorsFromPreferences();
-            if (colors == null || colors.isEmpty()) {
-                colors = getDefaultColors();
+            Log.d(TAG, "onSurfaceCreated");
+            this.holder = holder;
+            if (renderer == null) {
+                renderer = new WallpaperRenderer();
             }
-            
-            // Convert List to ArrayList for renderer compatibility if needed, 
-            // though renderer should accept List interface. 
-            // The user's prompt used ArrayList, so we'll ensure we pass something compatible.
-            // Our WallpaperRenderer doesn't take colors in constructor anymore, but setters.
-            // We'll adapt the user's logic to our existing architecture while keeping the robust flow.
-            
-            renderer = new WallpaperRenderer();
-            renderer.setSurfaceSize(width, height);
-            renderer.setColorPalette(new ColorPalette(colors));
-            
-            // Start drawing immediately
-            drawFrame();
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            Log.d(TAG, "Surface changed: " + width + "x" + height);
+            Log.d(TAG, "onSurfaceChanged: " + width + "x" + height);
+            this.holder = holder;
             if (renderer != null) {
                 renderer.setSurfaceSize(width, height);
             }
@@ -107,30 +91,38 @@ public class LiveMusicWallpaperService extends WallpaperService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             this.visible = visible;
-            
             if (visible) {
-                Log.d(TAG, "Wallpaper visible - start drawing");
+                // Initial draw
                 drawFrame();
             } else {
-                Log.d(TAG, "Wallpaper hidden - stop drawing");
                 handler.removeCallbacks(drawRunner);
             }
         }
-        
-        @Override
-        public void onSurfaceDestroyed(SurfaceHolder holder) {
-            super.onSurfaceDestroyed(holder);
-            visible = false;
-            handler.removeCallbacks(drawRunner);
-            Log.d(TAG, "Surface destroyed");
+
+        private void registerPrefsListener() {
+            android.content.SharedPreferences prefs = getSharedPreferences("WallpaperPrefs", MODE_PRIVATE);
+            prefsListener = (sharedPreferences, key) -> {
+                if ("current_color_palette_json".equals(key) || "color_count".equals(key)) {
+                    Log.d(TAG, "Prefs changed: " + key + ", reloading colors");
+                    java.util.List<Integer> colors = loadColorsFromPreferences();
+                    if (colors != null && !colors.isEmpty() && renderer != null) {
+                        renderer.setColorPalette(new ColorPalette(colors));
+                    }
+                }
+            };
+            prefs.registerOnSharedPreferenceChangeListener(prefsListener);
         }
-        
+
         @Override
         public void onDestroy() {
              super.onDestroy();
              handler.removeCallbacks(drawRunner);
              ColorPaletteManager.getInstance().removeListener(this);
              unregisterColorPaletteReceiver();
+             if (prefsListener != null) {
+                 getSharedPreferences("WallpaperPrefs", MODE_PRIVATE)
+                     .unregisterOnSharedPreferenceChangeListener(prefsListener);
+             }
              Log.d(TAG, "Engine destroyed");
         }
 

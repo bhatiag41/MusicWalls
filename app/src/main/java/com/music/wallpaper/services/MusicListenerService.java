@@ -69,8 +69,8 @@ public class MusicListenerService extends NotificationListenerService {
             // Extract album artwork
             Bitmap albumArt = metadata.getAlbumArtBitmap();
             if (albumArt == null) {
-                Log.d(TAG, "No album artwork, using default palette");
-                updateColorPalette(ColorPalette.getDefaultPalette(), metadata);
+                Log.d(TAG, "No album artwork found. Retaining previous palette.");
+                // HOST REQ: Do NOT revert to default. Just keep existing.
                 return;
             }
             
@@ -86,11 +86,14 @@ public class MusicListenerService extends NotificationListenerService {
         }
     }
     
+    private final android.os.Handler handler = new android.os.Handler();
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         if (isMusicNotification(sbn)) {
-            Log.d(TAG, "Music notification removed");
-            // Could optionally reset to default palette here
+            Log.d(TAG, "Music notification removed: " + sbn.getPackageName());
+            // HOST REQ: Do NOT revert to default colors.
+            // Retain the last known color palette indefinitely.
+            handler.removeCallbacksAndMessages(null); 
         }
     }
     
