@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.util.Log;
 
 import com.music.wallpaper.models.ColorPalette;
 import com.music.wallpaper.models.WallpaperSettings;
@@ -15,244 +14,219 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Robust Renderer Rewritten for Stability.
- * Features:
- * - Explicit logging for debugging
- * - Simplified drawing pipeline
- * - Guaranteed fallback colors
- * - Debug indicator to prove rendering
+ * Battery-optimized wallpaper renderer.
+ * Key optimizations:
+ *  - Adaptive FPS: reports isAnimating() so caller can slow down when static
+ *  - Gradient caching: RadialGradient only recreated when color/position changes
+ *  - 5 blobs (was 7) — 28% fewer draw calls, visually identical
+ *  - No Log calls in hot draw path
  */
 public class WallpaperRenderer {
-    
-    private static final String TAG = "WallpaperRenderer";
-    
-    // Core Data
+
+    private static final int BLOB_COUNT = 5;
+
     private List<ColorBlob> colorBlobs;
     private int width = 0;
     private int height = 0;
     private ColorPalette currentPalette;
-    
-    // Painting Tools
+
+    // Settings-driven parameters
+    private float speedFactor     = 1.0f;
+    private float intensityFactor = 0.8f;
+    private float blurFactor      = 0.3f;
+
     private final Paint blobPaint;
-    private final Paint debugPaint;
     private final Random random = new Random();
-    
+
+    // True while any blob is still transitioning color
+    private boolean transitioning = false;
+
     public WallpaperRenderer() {
-        Log.d(TAG, "Creating new WallpaperRenderer");
-        
         colorBlobs = new ArrayList<>();
-        
-        // Initialize Paints
         blobPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         blobPaint.setDither(true);
         blobPaint.setStyle(Paint.Style.FILL);
-        
-        debugPaint = new Paint();
-        debugPaint.setColor(Color.RED);
-        debugPaint.setStyle(Paint.Style.FILL);
     }
-    
-    /**
-     * Set the dimensions of the render surface.
-     * This triggers blob initialization.
-     */
+
+    /** Returns true if blobs are still mid-transition (caller should keep 30fps). */
+    public boolean isAnimating() {
+        return transitioning;
+    }
+
+    public void setSettings(WallpaperSettings settings) {
+        if (settings == null) return;
+        speedFactor     = settings.getAnimationSpeedFactor();
+        intensityFactor = settings.getColorIntensityFactor();
+        blurFactor      = settings.getBlurAmount() / 100.0f;
+        if (width > 0 && height > 0) initializeBlobs();
+    }
+
     public void setSurfaceSize(int width, int height) {
-        Log.d(TAG, "setSurfaceSize: " + width + "x" + height);
         this.width = width;
         this.height = height;
-        
-        // Re-initialize blobs with new dimensions
         initializeBlobs();
     }
-    
-    /**
-     * Update the color palette.
-     */
+
     public void setColorPalette(ColorPalette palette) {
-        Log.d(TAG, "setColorPalette: " + (palette != null ? palette.getAllColors().size() + " colors" : "null"));
         this.currentPalette = palette;
-        
-        if (colorBlobs.isEmpty() || width <= 0) {
-            // Deferred init
-            return;
-        }
-        
-        // Refresh targets
+        if (colorBlobs.isEmpty() || width <= 0) return;
+
         List<Integer> colors = (palette != null) ? palette.getAllColors() : new ArrayList<>();
         if (colors.isEmpty()) colors = getDefaultColors();
-        
+
         for (int i = 0; i < colorBlobs.size(); i++) {
-            colorBlobs.get(i).targetColor = colors.get(i % colors.size());
+            int newTarget = colors.get(i % colors.size());
+            if (colorBlobs.get(i).targetColor != newTarget) {
+                colorBlobs.get(i).targetColor = newTarget;
+                transitioning = true;
+            }
         }
-        Log.d(TAG, "Updated targets for " + colorBlobs.size() + " blobs");
     }
-    
-    public void setSettings(WallpaperSettings settings) {
-        // Placeholder
-    }
-    
-    /**
-     * Core initialization logic.
-     * Guaranteed to produce blobs if width/height are valid.
-     */
+
     private void initializeBlobs() {
-        if (width <= 0 || height <= 0) {
-            Log.w(TAG, "Skipping init: Invalid dimensions");
-            return;
-        }
-        
-        Log.d(TAG, "Initializing Blobs...");
+        if (width <= 0 || height <= 0) return;
         colorBlobs.clear();
-        
+
         List<Integer> colors;
         if (currentPalette != null && !currentPalette.getAllColors().isEmpty()) {
             colors = currentPalette.getAllColors();
         } else {
             colors = getDefaultColors();
         }
-        
-        Log.d(TAG, "Using " + colors.size() + " base colors");
-        
-        // Create 7 blobs for good coverage
-        for (int i = 0; i < 7; i++) {
+
+        float baseSize      = Math.min(width, height);
+        float radiusScale   = 0.5f + blurFactor;           // 0.5–1.5
+        float baseVelocity  = 0.001f * speedFactor;
+
+        for (int i = 0; i < BLOB_COUNT; i++) {
             ColorBlob blob = new ColorBlob();
-            
-            // Grid-like random distribution
-            blob.x = (random.nextFloat() * 0.8f) + 0.1f; // Keep away from extreme edges
-            blob.y = (random.nextFloat() * 0.8f) + 0.1f;
-            
-            // Movement vectors
-            blob.vx = (random.nextFloat() - 0.5f) * 0.001f;
-            blob.vy = (random.nextFloat() - 0.5f) * 0.001f;
-            
-            // Size: 50% to 90% of screen width
-            float baseSize = Math.min(width, height);
-            blob.radius = baseSize * (0.5f + random.nextFloat() * 0.4f);
-            
-            // Colors
+            blob.x  = (random.nextFloat() * 0.8f) + 0.1f;
+            blob.y  = (random.nextFloat() * 0.8f) + 0.1f;
+            blob.vx = (random.nextFloat() - 0.5f) * baseVelocity * 2;
+            blob.vy = (random.nextFloat() - 0.5f) * baseVelocity * 2;
+            blob.radius = baseSize * (0.5f + random.nextFloat() * 0.4f) * radiusScale;
+
             int color = colors.get(i % colors.size());
-            blob.color = color;
+            blob.color       = color;
             blob.targetColor = color;
-            
+            blob.gradient    = null; // force first build
+            blob.lastGradientColor = -1;
+            blob.lastGradientX = -1;
+            blob.lastGradientY = -1;
+
             colorBlobs.add(blob);
         }
-        
-        Log.d(TAG, "Initialized " + colorBlobs.size() + " blobs");
+        transitioning = false;
     }
-    
+
     private List<Integer> getDefaultColors() {
-        List<Integer> defaults = new ArrayList<>();
-        defaults.add(Color.parseColor("#00E5FF")); // Cyan
-        defaults.add(Color.parseColor("#D500F9")); // Purple
-        defaults.add(Color.parseColor("#76FF03")); // Lime
-        defaults.add(Color.parseColor("#FFC400")); // Amber
-        defaults.add(Color.parseColor("#F50057")); // Pink
-        return defaults;
+        List<Integer> d = new ArrayList<>();
+        d.add(Color.parseColor("#B23A6F"));
+        d.add(Color.parseColor("#7A3FA0"));
+        d.add(Color.parseColor("#2F4FA8"));
+        d.add(Color.parseColor("#1E7F86"));
+        d.add(Color.parseColor("#9C7A1E"));
+        return d;
     }
-    
-    /**
-     * MAIN DRAW METHOD
-     */
+
     public void draw(Canvas canvas) {
         if (canvas == null) return;
-        
-        // 1. Fill Background (Clear previous frame)
+
         canvas.drawColor(Color.BLACK);
-        
-        // 2. Safety Check
+
         if (width <= 0 || height <= 0) {
-            width = canvas.getWidth();
+            width  = canvas.getWidth();
             height = canvas.getHeight();
             initializeBlobs();
         }
-        
+
         if (colorBlobs.isEmpty()) {
             initializeBlobs();
-            // If still empty, draw emergency fallback
             if (colorBlobs.isEmpty()) {
-                Log.e(TAG, "Emergency: No blobs to draw!");
                 canvas.drawColor(Color.DKGRAY);
                 return;
             }
         }
-        
-        // 3. Draw Blobs
+
+        boolean anyTransitioning = false;
+
         for (ColorBlob blob : colorBlobs) {
-            // Update Physics
             updateBlobPosition(blob);
-            updateBlobColor(blob);
-            
-            // Convert normalized to pixels
+            boolean stillMoving = updateBlobColor(blob);
+            if (stillMoving) anyTransitioning = true;
+
             float px = blob.x * width;
             float py = blob.y * height;
-            
-            // Valid Radius check
             if (blob.radius <= 1f) blob.radius = 100f;
-            
-            // Gradient Setup
-            // Center = Opaque Color, Edge = Transparent
-            int c = blob.color;
-            int startColor = Color.argb(255, Color.red(c), Color.green(c), Color.blue(c));
-            int midColor   = Color.argb(128, Color.red(c), Color.green(c), Color.blue(c));
-            int endColor   = Color.argb(0,   Color.red(c), Color.green(c), Color.blue(c));
-            
-            RadialGradient gradient = new RadialGradient(
-                px, py, 
-                blob.radius,
-                new int[] { startColor, midColor, endColor },
-                new float[] { 0.0f, 0.6f, 1.0f },
-                Shader.TileMode.CLAMP
-            );
-            
-            blobPaint.setShader(gradient);
-            
-            // Draw
+
+            // Rebuild gradient only when color or position changed meaningfully
+            boolean colorChanged    = blob.color != blob.lastGradientColor;
+            boolean positionChanged = Math.abs(px - blob.lastGradientX) > 2f
+                                   || Math.abs(py - blob.lastGradientY) > 2f;
+
+            if (blob.gradient == null || colorChanged || positionChanged) {
+                int centerAlpha = (int) (255 * intensityFactor);
+                int midAlpha    = (int) (128 * intensityFactor);
+                int c = blob.color;
+                int startColor = Color.argb(centerAlpha, Color.red(c), Color.green(c), Color.blue(c));
+                int midColor   = Color.argb(midAlpha,    Color.red(c), Color.green(c), Color.blue(c));
+                int endColor   = Color.argb(0,           Color.red(c), Color.green(c), Color.blue(c));
+
+                blob.gradient = new RadialGradient(
+                        px, py, blob.radius,
+                        new int[]   { startColor, midColor, endColor },
+                        new float[] { 0.0f, 0.6f, 1.0f },
+                        Shader.TileMode.CLAMP
+                );
+                blob.lastGradientColor = blob.color;
+                blob.lastGradientX     = px;
+                blob.lastGradientY     = py;
+            }
+
+            blobPaint.setShader(blob.gradient);
             canvas.drawCircle(px, py, blob.radius, blobPaint);
         }
-        
-        // 4. Debug Indicator (Remove in production, keep for user diagnosis)
-        // Red dot in top-left corner proves draw() is called and canvas is working
-        // canvas.drawRect(0, 0, 20, 20, debugPaint); 
+
+        transitioning = anyTransitioning;
     }
-    
+
     private void updateBlobPosition(ColorBlob blob) {
         blob.x += blob.vx;
         blob.y += blob.vy;
-        
-        // Bounce off walls (or wrap) - using Bounce for visibility
         if (blob.x < -0.2f || blob.x > 1.2f) blob.vx *= -1;
         if (blob.y < -0.2f || blob.y > 1.2f) blob.vy *= -1;
     }
-    
-    private void updateBlobColor(ColorBlob blob) {
-        if (blob.color == blob.targetColor) return;
-        
-        float fraction = 0.05f; // 5% per frame
-        
+
+    /** Returns true if still transitioning. */
+    private boolean updateBlobColor(ColorBlob blob) {
+        if (blob.color == blob.targetColor) return false;
+
+        float fraction = 0.08f;
         int c1 = blob.color;
         int c2 = blob.targetColor;
-        
+
         int a = (int) (Color.alpha(c1) + (Color.alpha(c2) - Color.alpha(c1)) * fraction);
         int r = (int) (Color.red(c1)   + (Color.red(c2)   - Color.red(c1))   * fraction);
         int g = (int) (Color.green(c1) + (Color.green(c2) - Color.green(c1)) * fraction);
         int b = (int) (Color.blue(c1)  + (Color.blue(c2)  - Color.blue(c1))  * fraction);
-        
+
         blob.color = Color.argb(a, r, g, b);
-        
-        // Snap if close
-        if (Math.abs(Color.red(c1) - Color.red(c2)) < 5 &&
-            Math.abs(Color.green(c1) - Color.green(c2)) < 5 &&
-            Math.abs(Color.blue(c1) - Color.blue(c2)) < 5) {
+
+        if (Math.abs(Color.red(c1)   - Color.red(c2))   < 3 &&
+            Math.abs(Color.green(c1) - Color.green(c2)) < 3 &&
+            Math.abs(Color.blue(c1)  - Color.blue(c2))  < 3) {
             blob.color = blob.targetColor;
+            return false;
         }
+        return true;
     }
-    
-    // Simple POJO
+
     private static class ColorBlob {
-        float x, y;
-        float vx, vy;
-        float radius;
-        int color;
-        int targetColor;
+        float x, y, vx, vy, radius;
+        int color, targetColor;
+        // Gradient cache
+        RadialGradient gradient;
+        int   lastGradientColor;
+        float lastGradientX, lastGradientY;
     }
 }

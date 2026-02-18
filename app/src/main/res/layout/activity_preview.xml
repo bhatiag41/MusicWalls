@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Glass Overlay (Darker for AMOLED) -->
+    <!-- Subtle glass overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,6 +22,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
+        <!-- Back / close toolbar -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -32,31 +33,41 @@
             app:title="Preview"
             app:titleTextColor="#FFFFFF" />
 
+        <!-- Bottom button row -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
             android:orientation="horizontal"
-            android:padding="24dp"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <!-- Default Color: cycle through built-in palettes -->
             <Button
-                android:id="@+id/btnCycleSample"
+                android:id="@+id/btnDefaultColor"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:text="Cycle Color"
+                android:layout_marginEnd="12dp"
+                android:text="Default Color"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#33FFFFFF" />
+                android:textSize="14sp"
+                android:backgroundTint="#44ffffff" />
 
+            <!-- Set Wallpaper: opens system picker -->
             <Button
                 android:id="@+id/btnApplyWallpaper"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
                 android:text="Set Wallpaper"
                 android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 android:backgroundTint="#667eea" />
 
         </LinearLayout>

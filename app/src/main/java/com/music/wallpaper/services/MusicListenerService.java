@@ -35,7 +35,14 @@ public class MusicListenerService extends NotificationListenerService {
     
     private WallpaperSettings settings;
     private long lastUpdateTime = 0;
-    private static final long UPDATE_THROTTLE_MS = 2000; // Max once per 2 seconds
+    private static final long UPDATE_THROTTLE_MS = 500; // Max once per 0.5 seconds
+
+    // Dedup: skip color extraction if same song is still playing
+    private String lastTrackTitle = null;
+    private String lastArtistName = null;
+
+    public static final String EXTRA_TRACK_TITLE  = "track_title";
+    public static final String EXTRA_ARTIST_NAME  = "artist_name";
     
     @Override
     public void onCreate() {
@@ -65,19 +72,37 @@ public class MusicListenerService extends NotificationListenerService {
             }
             
             Log.d(TAG, "Extracted metadata: " + metadata.getTrackTitle() + " by " + metadata.getArtistName());
-            
+
+            // Save track info to prefs so MainActivity can display it
+            saveTrackInfoToPrefs(metadata.getTrackTitle(), metadata.getArtistName());
+
+            // Broadcast track info for live UI update
+            Intent trackIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
+            trackIntent.putExtra(EXTRA_TRACK_TITLE, metadata.getTrackTitle());
+            trackIntent.putExtra(EXTRA_ARTIST_NAME, metadata.getArtistName());
+            LocalBroadcastManager.getInstance(this).sendBroadcast(trackIntent);
+
+            // Dedup: skip expensive color extraction if same song is still playing
+            String title  = metadata.getTrackTitle();
+            String artist = metadata.getArtistName();
+            if (title.equals(lastTrackTitle) && artist.equals(lastArtistName)) {
+                Log.d(TAG, "Same song still playing, skipping color extraction");
+                return;
+            }
+            lastTrackTitle = title;
+            lastArtistName = artist;
+
             // Extract album artwork
             Bitmap albumArt = metadata.getAlbumArtBitmap();
             if (albumArt == null) {
                 Log.d(TAG, "No album artwork found. Retaining previous palette.");
-                // HOST REQ: Do NOT revert to default. Just keep existing.
                 return;
             }
-            
+
             // Extract color palette from artwork
             ColorPalette palette = ColorExtractor.extractPalette(albumArt);
             Log.d(TAG, "Extracted palette: " + palette);
-            
+
             // Update wallpaper with new palette
             updateColorPalette(palette, metadata);
             
@@ -255,6 +280,13 @@ public class MusicListenerService extends NotificationListenerService {
         Log.d(TAG, "Saved " + colors.size() + " colors to SharedPreferences");
     }
     
+    private void saveTrackInfoToPrefs(String title, String artist) {
+        getSharedPreferences("WallpaperPrefs", MODE_PRIVATE).edit()
+                .putString("last_track_title", title)
+                .putString("last_artist_name", artist)
+                .apply();
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
