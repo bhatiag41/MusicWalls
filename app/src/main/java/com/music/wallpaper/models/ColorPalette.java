@@ -58,6 +58,19 @@ public class ColorPalette {
         }
         return result;
     }
+
+    @NonNull
+    public float[] toFloatArray() {
+        float[] result = new float[20];
+        for (int i = 0; i < 5; i++) {
+            int c = (i < colors.size()) ? colors.get(i) : 0xFF000000;
+            result[i * 4 + 0] = android.graphics.Color.red(c) / 255f;
+            result[i * 4 + 1] = android.graphics.Color.green(c) / 255f;
+            result[i * 4 + 2] = android.graphics.Color.blue(c) / 255f;
+            result[i * 4 + 3] = android.graphics.Color.alpha(c) / 255f;
+        }
+        return result;
+    }
     
     @NonNull
     public String toJsonString() {

@@ -91,7 +91,7 @@ public class PermissionManager {
         try {
             Intent intent = new Intent(android.app.WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
             intent.putExtra(android.app.WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                new ComponentName(context, "com.music.wallpaper.services.LiveMusicWallpaperService"));
+                new ComponentName(context, "com.music.wallpaper.services.MusicWallpaperService"));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {

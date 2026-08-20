@@ -14,10 +14,11 @@ import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.music.wallpaper.managers.ColorPaletteManager;
+import com.music.wallpaper.managers.ColorPaletteManager;
 import com.music.wallpaper.models.ColorPalette;
 import com.music.wallpaper.models.MusicMetadata;
-import com.music.wallpaper.models.WallpaperSettings;
-import com.music.wallpaper.utils.ColorExtractor;
+import com.music.wallpaper.models.WallpaperPreferences;
+import com.music.wallpaper.palette.PaletteExtractor;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class MusicListenerService extends NotificationListenerService {
     public static final String EXTRA_COLOR_PALETTE_JSON = "color_palette_json";
     public static final String EXTRA_MUSIC_METADATA = "music_metadata";
     
-    private WallpaperSettings settings;
+    private WallpaperPreferences settings;
     private long lastUpdateTime = 0;
     private static final long UPDATE_THROTTLE_MS = 500; // Max once per 0.5 seconds
 
@@ -47,7 +48,7 @@ public class MusicListenerService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        settings = WallpaperSettings.loadFromPreferences(this);
+        settings = WallpaperPreferences.Companion.load(this);
         Log.d(TAG, "MusicListenerService created");
     }
     
@@ -55,7 +56,7 @@ public class MusicListenerService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         try {
             // Reload settings to pick up changes
-            settings = WallpaperSettings.loadFromPreferences(this);
+            settings = WallpaperPreferences.Companion.load(this);
             
             // Check if this is a music notification from enabled apps
             if (!isMusicNotification(sbn)) {
@@ -100,7 +101,7 @@ public class MusicListenerService extends NotificationListenerService {
             }
 
             // Extract color palette from artwork
-            ColorPalette palette = ColorExtractor.extractPalette(albumArt);
+            ColorPalette palette = PaletteExtractor.extractPalette(albumArt);
             Log.d(TAG, "Extracted palette: " + palette);
 
             // Update wallpaper with new palette
@@ -291,6 +292,5 @@ public class MusicListenerService extends NotificationListenerService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "MusicListenerService destroyed");
-        ColorExtractor.clearCache();
     }
 }

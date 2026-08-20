@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import androidx.preference.PreferenceManager;
-
 import com.music.wallpaper.models.ColorPalette;
 
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import java.util.List;
 public class ColorPaletteManager {
     
     private static final String TAG = "ColorPaletteManager";
+    private static final String PREFS_NAME = "WallpaperPrefs";
     private static final String PREF_CURRENT_PALETTE = "current_color_palette_json";
     
     private static volatile ColorPaletteManager instance;
@@ -137,7 +136,7 @@ public class ColorPaletteManager {
      */
     private void savePaletteToPreferences(Context context, ColorPalette palette) {
         try {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             String json = palette.toJsonString();
             prefs.edit().putString(PREF_CURRENT_PALETTE, json).apply();
             Log.d(TAG, "Palette saved to preferences");
@@ -151,7 +150,7 @@ public class ColorPaletteManager {
      */
     private ColorPalette loadPaletteFromPreferences(Context context) {
         try {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             String json = prefs.getString(PREF_CURRENT_PALETTE, null);
             if (json != null) {
                 ColorPalette palette = ColorPalette.fromJsonString(json);

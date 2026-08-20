@@ -23,33 +23,21 @@
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Musicwallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <!-- Onboarding Activity -->
-        <activity
-            android:name=".ui.OnboardingActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Musicwallpaper" />
-        
         <!-- Settings Activity -->
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.ComposeSettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"
-            android:parentActivityName=".MainActivity" />
-        
-        <!-- Preview Activity -->
-        <activity
-            android:name=".ui.PreviewActivity"
-            android:exported="false"
-            android:label="@string/preview_title"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.Musicwallpaper.Fullscreen" />
+            android:theme="@style/Theme.Musicwallpaper" />
         
         <!-- Music Notification Listener Service -->
         <service
@@ -63,7 +51,7 @@
         
         <!-- Live Wallpaper Service -->
         <service
-            android:name=".services.LiveMusicWallpaperService"
+            android:name=".services.MusicWallpaperService"
             android:exported="true"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
