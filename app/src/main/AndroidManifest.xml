@@ -31,14 +31,7 @@
             </intent-filter>
         </activity>
         
-        <!-- Settings Activity -->
-        <activity
-            android:name=".ui.ComposeSettingsActivity"
-            android:exported="false"
-            android:label="@string/settings_title"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.Musicwallpaper" />
-        
+
         <!-- Music Notification Listener Service -->
         <service
             android:name=".services.MusicListenerService"

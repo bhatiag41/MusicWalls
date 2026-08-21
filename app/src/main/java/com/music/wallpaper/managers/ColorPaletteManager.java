@@ -2,10 +2,14 @@ package com.music.wallpaper.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.music.wallpaper.models.ColorPalette;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +26,7 @@ public class ColorPaletteManager {
     private static volatile ColorPaletteManager instance;
     
     private ColorPalette currentPalette;
+    private Bitmap currentArtwork;
     private final List<ColorPaletteListener> listeners;
     private final Object lock = new Object();
     
@@ -163,6 +168,56 @@ public class ColorPaletteManager {
         return null;
     }
     
+    /**
+     * Updates and caches the currently playing album artwork.
+     */
+    public void updateArtwork(Context context, Bitmap artwork) {
+        synchronized (lock) {
+            this.currentArtwork = artwork;
+            if (artwork != null && context != null) {
+                saveArtworkToDisk(context, artwork);
+            }
+        }
+    }
+
+    /**
+     * Gets the currently playing album artwork.
+     */
+    public Bitmap getCurrentArtwork(Context context) {
+        synchronized (lock) {
+            if (currentArtwork != null && !currentArtwork.isRecycled()) {
+                return currentArtwork;
+            }
+            if (context != null) {
+                currentArtwork = loadArtworkFromDisk(context);
+            }
+            return currentArtwork;
+        }
+    }
+
+    private void saveArtworkToDisk(Context context, Bitmap bitmap) {
+        try {
+            File file = new File(context.getCacheDir(), "current_album_art.png");
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to save artwork to disk", e);
+        }
+    }
+
+    private Bitmap loadArtworkFromDisk(Context context) {
+        try {
+            File file = new File(context.getCacheDir(), "current_album_art.png");
+            if (file.exists()) {
+                return BitmapFactory.decodeFile(file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to load artwork from disk", e);
+        }
+        return null;
+    }
+
     /**
      * Clears all listeners (useful for cleanup).
      */

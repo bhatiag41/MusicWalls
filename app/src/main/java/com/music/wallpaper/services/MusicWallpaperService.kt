@@ -205,7 +205,7 @@ class MusicWallpaperService : WallpaperService() {
             val settings = WallpaperPreferences.load(this@MusicWallpaperService)
             renderer?.setSpeed(settings.animationSpeed)
             renderer?.setIntensity(settings.intensity)
-            renderer?.setGrainEnabled(settings.grainEnabled)
+            renderer?.setStyle(settings.wallpaperStyle)
         }
 
         private fun onMusicPaletteReceived(palette: ColorPalette?) {
@@ -261,8 +261,7 @@ class MusicWallpaperService : WallpaperService() {
             prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 if (key == WallpaperPreferences.KEY_ANIMATION_SPEED ||
                     key == WallpaperPreferences.KEY_INTENSITY ||
-                    key == WallpaperPreferences.KEY_GRAIN_ENABLED ||
-                    key == WallpaperPreferences.KEY_PALETTE_STYLE
+                    key == WallpaperPreferences.KEY_WALLPAPER_STYLE
                 ) {
                     drawHandler?.post { applyCurrentSettings() }
                 }

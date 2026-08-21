@@ -10,8 +10,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.music.wallpaper.managers.ColorPaletteManager
 import com.music.wallpaper.models.ColorPalette
-import com.music.wallpaper.models.PaletteStyle
 import com.music.wallpaper.models.WallpaperPreferences
+import com.music.wallpaper.models.WallpaperStyle
 import com.music.wallpaper.services.MusicListenerService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,6 +54,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
+    fun updateWallpaperStyle(style: WallpaperStyle) {
+        val updated = _preferences.value.copy(wallpaperStyle = style)
+        _preferences.value = updated
+        WallpaperPreferences.save(getApplication(), updated)
+    }
+
     fun updateSpeed(speed: Float) {
         val updated = _preferences.value.copy(animationSpeed = speed)
         _preferences.value = updated
@@ -66,17 +72,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         WallpaperPreferences.save(getApplication(), updated)
     }
 
-    fun updatePaletteStyle(style: PaletteStyle) {
-        val updated = _preferences.value.copy(paletteStyle = style)
-        _preferences.value = updated
-        WallpaperPreferences.save(getApplication(), updated)
-    }
 
-    fun updateGrainEnabled(enabled: Boolean) {
-        val updated = _preferences.value.copy(grainEnabled = enabled)
-        _preferences.value = updated
-        WallpaperPreferences.save(getApplication(), updated)
-    }
 
     fun toggleMusicApp(appKey: String, enabled: Boolean) {
         val currentApps = _preferences.value.enabledMusicApps.toMutableSet()

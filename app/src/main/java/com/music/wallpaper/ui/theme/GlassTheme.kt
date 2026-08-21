@@ -1,7 +1,5 @@
 package com.music.wallpaper.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -14,35 +12,33 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Color definitions for dark-mode glass UI
-val DarkBackground = Color(0xFF08080B)
-val DarkSurface = Color(0xFF101015)
-val GlassSurface = Color(0xFF16161E).copy(alpha = 0.65f)
-val GlassSurfaceHighlight = Color(0xFF222230).copy(alpha = 0.5f)
-val GlassBorder = Color(0xFFFFFFFF).copy(alpha = 0.08f)
-val GlassBorderFocused = Color(0xFFFFFFFF).copy(alpha = 0.22f)
+// Native Android Dark Palette
+val DarkBackground = Color(0xFF0C0C0F)
+val DarkSurface = Color(0xFF141418)
+val DarkSurfaceVariant = Color(0xFF1C1C22)
+val DarkBorder = Color(0xFFFFFFFF).copy(alpha = 0.08f)
 
-val TextPrimary = Color(0xFFF0F0F5)
-val TextSecondary = Color(0xFF9494A8)
-val TextMuted = Color(0xFF5E5E72)
+val TextPrimary = Color(0xFFF2F2F5)
+val TextSecondary = Color(0xFF9090A0)
+val TextMuted = Color(0xFF656577)
 
-data class GlassPalette(
+data class AppThemeColors(
     val accent: Color = Color(0xFF818CF8),
-    val accentSecondary: Color = Color(0xFF38BDF8),
     val background: Color = DarkBackground,
     val surface: Color = DarkSurface,
-    val glassCard: Color = GlassSurface,
-    val glassBorder: Color = GlassBorder,
+    val surfaceVariant: Color = DarkSurfaceVariant,
+    val border: Color = DarkBorder,
     val textPrimary: Color = TextPrimary,
-    val textSecondary: Color = TextSecondary
+    val textSecondary: Color = TextSecondary,
+    val textMuted: Color = TextMuted
 )
 
-val LocalGlassPalette = staticCompositionLocalOf { GlassPalette() }
+val LocalAppThemeColors = staticCompositionLocalOf { AppThemeColors() }
 
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF818CF8),
     onPrimary = Color(0xFF0F172A),
-    primaryContainer = Color(0xFF312E81),
+    primaryContainer = Color(0xFF1E1B4B),
     onPrimaryContainer = Color(0xFFE0E7FF),
     secondary = Color(0xFF38BDF8),
     onSecondary = Color(0xFF082F49),
@@ -50,34 +46,33 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = TextPrimary,
     surface = DarkSurface,
     onSurface = TextPrimary,
-    surfaceVariant = Color(0xFF1E1E28),
+    surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = TextSecondary,
-    outline = GlassBorder
+    outline = DarkBorder
 )
 
 val AppTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp,
-        lineHeight = 34.sp,
-        letterSpacing = (-0.5).sp,
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.4).sp,
         color = TextPrimary
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = (-0.3).sp,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.2).sp,
         color = TextPrimary
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
-        letterSpacing = (-0.2).sp,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
         color = TextPrimary
     ),
     titleMedium = TextStyle(
@@ -104,8 +99,8 @@ val AppTypography = Typography(
     labelSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 11.sp,
-        lineHeight = 14.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.8.sp,
         color = TextMuted
     )
@@ -116,17 +111,16 @@ fun GlassTheme(
     accentColor: Color = Color(0xFF818CF8),
     content: @Composable () -> Unit
 ) {
-    val glassPalette = GlassPalette(
-        accent = accentColor,
-        accentSecondary = accentColor.copy(alpha = 0.7f)
+    val themeColors = AppThemeColors(
+        accent = accentColor
     )
 
     val dynamicColorScheme = DarkColorScheme.copy(
         primary = accentColor,
-        secondary = accentColor.copy(alpha = 0.8f)
+        secondary = accentColor
     )
 
-    CompositionLocalProvider(LocalGlassPalette provides glassPalette) {
+    CompositionLocalProvider(LocalAppThemeColors provides themeColors) {
         MaterialTheme(
             colorScheme = dynamicColorScheme,
             typography = AppTypography,

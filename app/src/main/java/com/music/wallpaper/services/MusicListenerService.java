@@ -250,6 +250,9 @@ public class MusicListenerService extends NotificationListenerService {
         
         // 2. Update singleton manager 
         ColorPaletteManager.getInstance().updatePalette(this, palette);
+        if (metadata != null && metadata.getAlbumArtBitmap() != null) {
+            ColorPaletteManager.getInstance().updateArtwork(this, metadata.getAlbumArtBitmap());
+        }
         
         // 3. Send LocalBroadcast
         Intent localIntent = new Intent(ACTION_COLOR_PALETTE_CHANGED);
