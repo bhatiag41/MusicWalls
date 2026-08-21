@@ -377,13 +377,13 @@ fun MainScreen(
                             text = "Synora",
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
-                            color = dynamicTextColor
+                            color = Color.White
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "where music meets your walls",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = dynamicTextColor.copy(alpha = 0.8f)
+                            color = Color.White.copy(alpha = 0.8f)
                         )
                     }
                 }
@@ -409,7 +409,7 @@ fun MainScreen(
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .border(1.dp, dynamicTextColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                             )
                         } else {
                             Box(
@@ -417,7 +417,7 @@ fun MainScreen(
                                     .size(56.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.Black.copy(alpha = 0.3f))
-                                    .border(1.dp, dynamicTextColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
+                                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(
@@ -434,7 +434,7 @@ fun MainScreen(
                                 text = trackTitle ?: "No music playing",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = dynamicTextColor,
+                                color = Color.White,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -442,7 +442,7 @@ fun MainScreen(
                             Text(
                                 text = artistName ?: "Play a song to sync colors",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = dynamicTextColor.copy(alpha = 0.8f),
+                                color = Color.White.copy(alpha = 0.8f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )

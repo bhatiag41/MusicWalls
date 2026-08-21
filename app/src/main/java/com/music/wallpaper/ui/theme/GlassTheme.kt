@@ -11,6 +11,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.music.wallpaper.R
 
 // Native Android Dark Palette
 val DarkBackground = Color(0xFF0C0C0F)
@@ -51,9 +52,40 @@ private val DarkColorScheme = darkColorScheme(
     outline = DarkBorder
 )
 
+private val GoogleFontsProvider = androidx.compose.ui.text.googlefonts.GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+private val InterFont = androidx.compose.ui.text.googlefonts.GoogleFont("Inter")
+
+private val InterFontFamily = FontFamily(
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = InterFont,
+        fontProvider = GoogleFontsProvider,
+        weight = FontWeight.Normal
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = InterFont,
+        fontProvider = GoogleFontsProvider,
+        weight = FontWeight.Medium
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = InterFont,
+        fontProvider = GoogleFontsProvider,
+        weight = FontWeight.SemiBold
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = InterFont,
+        fontProvider = GoogleFontsProvider,
+        weight = FontWeight.Bold
+    )
+)
+
 val AppTypography = Typography(
     headlineLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 32.sp,
@@ -61,7 +93,7 @@ val AppTypography = Typography(
         color = TextPrimary
     ),
     headlineMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
@@ -69,35 +101,35 @@ val AppTypography = Typography(
         color = TextPrimary
     ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 17.sp,
         lineHeight = 22.sp,
         color = TextPrimary
     ),
     titleMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         lineHeight = 20.sp,
         color = TextPrimary
     ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 22.sp,
         color = TextSecondary
     ),
     bodyMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 13.sp,
         lineHeight = 18.sp,
         color = TextSecondary
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = InterFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
         lineHeight = 16.sp,

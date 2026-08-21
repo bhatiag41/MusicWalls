@@ -243,9 +243,11 @@ class MusicWallpaperService : WallpaperService() {
                     }
                 }
             }
-            this@MusicWallpaperService.registerReceiver(
-                globalColorReceiver,
-                IntentFilter(MusicListenerService.ACTION_COLOR_PALETTE_CHANGED)
+            androidx.core.content.ContextCompat.registerReceiver(
+                this@MusicWallpaperService,
+                globalColorReceiver!!,
+                IntentFilter(MusicListenerService.ACTION_COLOR_PALETTE_CHANGED),
+                androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
             )
         }
 

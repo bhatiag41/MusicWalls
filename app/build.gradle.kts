@@ -61,6 +61,9 @@ dependencies {
     // LocalBroadcastManager for service communication
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 
+    // Google Fonts (Inter — closest to Helvetica/SF Pro on Android)
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

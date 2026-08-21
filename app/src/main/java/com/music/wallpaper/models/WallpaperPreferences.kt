@@ -7,9 +7,10 @@ import android.content.SharedPreferences
 
 enum class WallpaperStyle(val displayName: String) {
     AURORA_DRIFT("Aurora Drift"),       // 0: Domain-warped noise, soft screen blend (default)
-    CRYSTAL_REFRACTION("Faceted Light"),// 1: Low-poly 3D-lit gradient mesh
+    CRYSTAL_REFRACTION("Faceted Light"),// 1: Voronoi gem/crystal facets — gap-free
     MIDNIGHT("Midnight"),               // 2: True black AMOLED, Aurora Drift starved of color
-    NEON_FILAMENTS("Filaments")         // 3: True black AMOLED, noise gradient ridge glowing filaments
+    NEON_FILAMENTS("Filaments"),        // 3: True black AMOLED, noise gradient ridge glowing filaments
+    POLY_MESH("Poly Mesh")             // 4: Original low-poly 3D-lit triangle mesh
 }
 
 data class WallpaperPreferences(
