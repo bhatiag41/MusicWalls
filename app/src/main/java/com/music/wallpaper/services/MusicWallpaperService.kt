@@ -16,6 +16,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.music.wallpaper.managers.ColorPaletteManager
 import com.music.wallpaper.models.ColorPalette
 import com.music.wallpaper.models.WallpaperPreferences
+import com.music.wallpaper.models.WallpaperStyle
 import com.music.wallpaper.palette.PaletteCrossfader
 import com.music.wallpaper.renderer.ShaderRenderer
 
@@ -95,8 +96,13 @@ class MusicWallpaperService : WallpaperService() {
         private val colorCycleRunner = object : Runnable {
             override fun run() {
                 if (!visible || musicEverReceived) return
-                cycleIndex = (cycleIndex + 1) % defaultPalettes.size
-                crossfader.setTargetPalette(defaultPalettes[cycleIndex])
+                val prefs = WallpaperPreferences.load(this@MusicWallpaperService)
+                if (prefs.wallpaperStyle == WallpaperStyle.AURORA_DRIFT) {
+                    cycleIndex = (cycleIndex + 1) % defaultPalettes.size
+                    crossfader.setTargetPalette(defaultPalettes[cycleIndex])
+                } else {
+                    crossfader.setTargetPalette(ColorPalette.getAestheticDefaultPalette().toFloatArray())
+                }
                 drawHandler?.removeCallbacks(this)
                 drawHandler?.postDelayed(this, CYCLE_INTERVAL_MS)
             }
@@ -126,7 +132,12 @@ class MusicWallpaperService : WallpaperService() {
             if (savedPalette != null) {
                 crossfader.setTargetPalette(savedPalette.toFloatArray())
             } else {
-                crossfader.setTargetPalette(defaultPalettes[0])
+                val prefs = WallpaperPreferences.load(this@MusicWallpaperService)
+                if (prefs.wallpaperStyle == WallpaperStyle.AURORA_DRIFT) {
+                    crossfader.setTargetPalette(defaultPalettes[0])
+                } else {
+                    crossfader.setTargetPalette(ColorPalette.getAestheticDefaultPalette().toFloatArray())
+                }
             }
 
             ColorPaletteManager.getInstance().addListener(this)
@@ -216,7 +227,14 @@ class MusicWallpaperService : WallpaperService() {
                     .edit().putBoolean(PREF_MUSIC_EVER_RECEIVED, true).apply()
             }
             drawHandler?.removeCallbacks(colorCycleRunner)
-            crossfader.setTargetPalette(palette.toFloatArray())
+            
+            val prefs = WallpaperPreferences.load(this@MusicWallpaperService)
+            val finalPalette = if (palette == ColorPalette.getDefaultPalette() && prefs.wallpaperStyle != WallpaperStyle.AURORA_DRIFT) {
+                ColorPalette.getAestheticDefaultPalette()
+            } else {
+                palette
+            }
+            crossfader.setTargetPalette(finalPalette.toFloatArray())
         }
 
         override fun onColorPaletteChanged(newPalette: ColorPalette?) {

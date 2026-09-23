@@ -116,13 +116,25 @@ public class ColorPalette {
     
     @NonNull
     public static ColorPalette getDefaultPalette() {
-        // Default VIBRANT NEON colors for AMOLED
+        // Default VIBRANT NEON colors for AMOLED (used primarily for Aurora Drift)
         List<Integer> defaults = new ArrayList<>();
         defaults.add(0xFF00E5FF); // Neon Cyan
         defaults.add(0xFFD500F9); // Neon Purple
         defaults.add(0xFF76FF03); // Neon Green
         defaults.add(0xFFFF3D00); // Neon Orange
         defaults.add(0xFF2979FF); // Electric Blue
+        return new ColorPalette(defaults);
+    }
+    
+    @NonNull
+    public static ColorPalette getAestheticDefaultPalette() {
+        // Aesthetic soft pastel blend (#667EEA to #764BA2) for Faceted, Midnight, etc.
+        List<Integer> defaults = new ArrayList<>();
+        defaults.add(0xFF667EEA); // Soft Indigo
+        defaults.add(0xFF6B65C8); // Intermediate
+        defaults.add(0xFF764BA2); // Deep Purple
+        defaults.add(0xFF5A387E); // Darker Purple
+        defaults.add(0xFF4D5EB0); // Darker Indigo
         return new ColorPalette(defaults);
     }
     

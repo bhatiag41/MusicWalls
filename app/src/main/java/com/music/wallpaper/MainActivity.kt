@@ -32,12 +32,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -61,6 +63,8 @@ import com.music.wallpaper.ui.components.*
 import com.music.wallpaper.ui.theme.*
 import com.music.wallpaper.ui.viewmodel.SettingsViewModel
 import com.music.wallpaper.utils.PermissionManager
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 
 class MainActivity : ComponentActivity(), ColorPaletteManager.ColorPaletteListener {
 
@@ -103,9 +107,10 @@ class MainActivity : ComponentActivity(), ColorPaletteManager.ColorPaletteListen
                 val colors = palette.allColors
                 if (colors.isNotEmpty()) {
                     val c = if (colors.size > 1) colors[1] else colors[0]
-                    Color(c)
+                    // Clamp to soft pastel — never neon/over-saturated
+                    toPremiumAccent(Color(c))
                 } else {
-                    Color(0xFF818CF8)
+                    Color(0xFF8B5CF6)
                 }
             }
 
@@ -259,25 +264,26 @@ fun MainScreen(
                     )
                 }
                 
-                // Permission Alert inside the sheet content if not granted
+                // Permission Alert — native app card style, no harsh OS colors
                 AnimatedVisibility(visible = !hasNotificationPermission) {
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF1E1608).copy(alpha = 0.90f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(Radius.md),
+                        color = DarkSurface,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp)
                     ) {
-                        Column(modifier = Modifier.padding(18.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Warning,
+                                    imageVector = Icons.Outlined.NotificationsNone,
                                     contentDescription = null,
-                                    tint = Color(0xFFF59E0B)
+                                    tint = theme.accent,
+                                    modifier = Modifier.size(22.dp)
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -288,7 +294,7 @@ fun MainScreen(
                                     )
                                     Text(
                                         text = "Needed to detect current music.",
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         color = TextSecondary
                                     )
                                 }
@@ -349,7 +355,87 @@ fun MainScreen(
                         }
                     )
                     
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = DarkBorder, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    
+                    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Made with ❤️ by Gaurav Bhatia",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "GitHub",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = theme.accent,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        uriHandler.openUri("https://github.com/bhatiag41/MusicWalls")
+                                    }
+                                    .padding(4.dp)
+                            )
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary
+                            )
+                            Text(
+                                text = "Privacy Policy",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = theme.accent,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "I don't have time or tokens to collect any data",
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    .padding(4.dp)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(20.dp))
+                        
+                        // SYNORA watermark — subtle vertical fade into transparent
+                        Text(
+                            text = "SYNORA",
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontSize = TextUnit(88f, TextUnitType.Sp),
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = TextUnit(-3f, TextUnitType.Sp),
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        TextSecondary.copy(alpha = 0.10f),
+                                        Color.Transparent
+                                    )
+                                )
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .offset(y = 48.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
                 }
             }
         },
@@ -362,8 +448,22 @@ fun MainScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
+                // Gradient scrim — legibility on bright album art backgrounds
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.28f)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.45f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+
                 // Foreground Overlays directly on top of the live preview
-                // Display app title at the top with dynamic contrast text
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -371,7 +471,7 @@ fun MainScreen(
                         .padding(horizontal = 24.dp, vertical = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Header text
+                    // Header text — always readable against the scrim above
                     Column(modifier = Modifier.padding(top = 8.dp)) {
                         Text(
                             text = "Synora",
@@ -401,6 +501,7 @@ fun MainScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Album art swatch — only shown when a track is actively detected
                         if (currentArtwork != null && !currentArtwork.isRecycled) {
                             Image(
                                 bitmap = currentArtwork.asImageBitmap(),
@@ -408,25 +509,17 @@ fun MainScreen(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(56.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(Radius.sm))
+                                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(Radius.sm))
                             )
                         } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.Black.copy(alpha = 0.3f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .clip(CircleShape)
-                                        .background(theme.accent)
-                                )
-                            }
+                            // No music — neutral icon, no placeholder colored box
+                            Icon(
+                                    imageVector = Icons.Outlined.MusicNote,
+                                contentDescription = null,
+                                tint = TextMuted,
+                                modifier = Modifier.size(22.dp)
+                            )
                         }
 
                         Column(modifier = Modifier.weight(1f)) {
@@ -483,9 +576,9 @@ fun SettingStylePillsRow(
                 val isSelected = style == selectedStyle
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(Radius.xs))
                         .background(if (isSelected) theme.accent else DarkSurfaceVariant)
-                        .border(1.dp, if (isSelected) theme.accent else DarkBorder, RoundedCornerShape(12.dp))
+                        .border(1.dp, if (isSelected) theme.accent else DarkBorder, RoundedCornerShape(Radius.xs))
                         .clickable { onSelectStyle(style) }
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     contentAlignment = Alignment.Center
@@ -512,8 +605,13 @@ fun LivePreviewThumbnail(
     val renderer = remember { ShaderRenderer.create() }
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(palette) {
-        crossfader.setTargetPalette(palette.toFloatArray())
+    LaunchedEffect(palette, preferences.wallpaperStyle) {
+        val finalPalette = if (palette == ColorPalette.getDefaultPalette() && preferences.wallpaperStyle != com.music.wallpaper.models.WallpaperStyle.AURORA_DRIFT) {
+            ColorPalette.getAestheticDefaultPalette()
+        } else {
+            palette
+        }
+        crossfader.setTargetPalette(finalPalette.toFloatArray())
     }
 
     LaunchedEffect(preferences.wallpaperStyle) {

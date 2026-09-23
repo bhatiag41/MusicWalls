@@ -7,11 +7,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 import com.music.wallpaper.R
+
+// ─── Radius Design Tokens ────────────────────────────────────────────────────
+object Radius {
+    val xs   = 8.dp    // chips, small pills
+    val sm   = 12.dp   // buttons, input fields, slider tracks
+    val md   = 16.dp   // cards, banners, dropdowns
+    val lg   = 24.dp   // bottom sheet top-corner surfaces
+    val pill = 999.dp  // primary CTA only ("Set as Wallpaper")
+}
+
+// ─── Accent Color Helper ──────────────────────────────────────────────────────
+/**
+ * Converts a raw extracted album-art color into a soft, muted pastel accent
+ * that still visibly shifts with the music but never neon/over-saturated.
+ *
+ * Clamps HSL:
+ *   Saturation → 35 – 55 %
+ *   Lightness  → 55 – 70 %
+ */
+fun toPremiumAccent(color: Color): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(color.toArgb(), hsl)
+    // Clamp saturation to 0.35–0.55
+    hsl[1] = hsl[1].coerceIn(0.35f, 0.55f)
+    // Clamp lightness to 0.55–0.70
+    hsl[2] = hsl[2].coerceIn(0.55f, 0.70f)
+    return Color(ColorUtils.HSLToColor(hsl))
+}
 
 // Native Android Dark Palette
 val DarkBackground = Color(0xFF0C0C0F)
@@ -24,7 +55,7 @@ val TextSecondary = Color(0xFF9090A0)
 val TextMuted = Color(0xFF656577)
 
 data class AppThemeColors(
-    val accent: Color = Color(0xFF818CF8),
+    val accent: Color = Color(0xFF8B5CF6),
     val background: Color = DarkBackground,
     val surface: Color = DarkSurface,
     val surfaceVariant: Color = DarkSurfaceVariant,
@@ -37,7 +68,7 @@ data class AppThemeColors(
 val LocalAppThemeColors = staticCompositionLocalOf { AppThemeColors() }
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF818CF8),
+    primary = Color(0xFF8B5CF6),
     onPrimary = Color(0xFF0F172A),
     primaryContainer = Color(0xFF1E1B4B),
     onPrimaryContainer = Color(0xFFE0E7FF),
@@ -140,7 +171,7 @@ val AppTypography = Typography(
 
 @Composable
 fun GlassTheme(
-    accentColor: Color = Color(0xFF818CF8),
+    accentColor: Color = Color(0xFF8B5CF6),
     content: @Composable () -> Unit
 ) {
     val themeColors = AppThemeColors(

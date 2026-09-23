@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.music.wallpaper.ui.theme.DarkBorder
 import com.music.wallpaper.ui.theme.DarkSurfaceVariant
 import com.music.wallpaper.ui.theme.LocalAppThemeColors
+import com.music.wallpaper.ui.theme.Radius
 import com.music.wallpaper.ui.theme.TextMuted
 import com.music.wallpaper.ui.theme.TextPrimary
 import com.music.wallpaper.ui.theme.TextSecondary
@@ -151,10 +152,10 @@ fun <T> SettingSegmentedRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(Radius.md))
                 .background(DarkSurfaceVariant)
-                .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-                .padding(3.dp),
+                .border(1.dp, DarkBorder, RoundedCornerShape(Radius.md))
+                .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items.forEach { item ->
@@ -171,7 +172,7 @@ fun <T> SettingSegmentedRow(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(9.dp))
+                        .clip(RoundedCornerShape(Radius.sm))
                         .background(bgColor)
                         .clickable { onItemSelected(item) }
                         .padding(vertical = 10.dp),
@@ -241,7 +242,7 @@ fun MusicSourcesDropdown(
                     focusedContainerColor = DarkSurfaceVariant,
                     unfocusedContainerColor = DarkSurfaceVariant
                 ),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Radius.md),
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
@@ -301,7 +302,7 @@ fun PrimaryActionButton(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = ButtonDefaults.buttonColors(
             containerColor = theme.accent,
             contentColor = Color.White
@@ -327,7 +328,7 @@ fun SecondaryActionButton(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Transparent,
             contentColor = TextPrimary
