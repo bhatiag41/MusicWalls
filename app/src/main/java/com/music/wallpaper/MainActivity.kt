@@ -250,6 +250,7 @@ fun MainScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight(0.55f)
                     .padding(horizontal = 24.dp)
             ) {
                 // Primary Apply Button inside the sheet
